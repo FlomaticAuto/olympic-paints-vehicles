@@ -1,1 +1,353 @@
-init
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Olympic Paints — Fleet Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Segoe UI",Arial,sans-serif;background:#f0f4f8;color:#1a2332;min-height:100vh}
+
+/* Header */
+.hdr{background:#1F3864;color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.hdr-left h1{font-size:20px;font-weight:700;letter-spacing:.3px}
+.hdr-left p{font-size:12px;opacity:.75;margin-top:3px}
+.hdr-right{text-align:right;font-size:11px;opacity:.7;line-height:1.6}
+
+/* KPI strip */
+.kpi-strip{background:#2E75B6;padding:12px 24px;display:flex;gap:10px;flex-wrap:wrap}
+.kpi{background:#1F3864;border-radius:8px;padding:12px 18px;flex:1;min-width:140px;text-align:center}
+.kpi-lbl{font-size:10px;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.6px}
+.kpi-val{font-size:26px;font-weight:700;color:#fff;margin-top:4px;line-height:1}
+.kpi-sub{font-size:10px;color:rgba(255,255,255,.5);margin-top:3px}
+
+/* Tabs */
+.tab-nav{background:#1F3864;display:flex;padding:0 20px;border-bottom:2px solid #2E75B6}
+.tab-btn{padding:11px 18px;color:rgba(255,255,255,.65);cursor:pointer;border-bottom:3px solid transparent;font-size:13px;font-weight:500;transition:all .2s;user-select:none}
+.tab-btn:hover{color:#fff}
+.tab-btn.active{color:#fff;border-bottom-color:#ED7D31}
+
+/* Content */
+.tab-pane{display:none;padding:20px 24px}
+.tab-pane.active{display:block}
+
+/* Card */
+.card{background:#fff;border-radius:8px;padding:18px 20px;margin-bottom:18px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.card-title{font-size:12px;font-weight:700;color:#1F3864;text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #EEF4FB}
+
+/* Grid */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:860px){.g2{grid-template-columns:1fr}}
+
+/* Table */
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl thead th{background:#1F3864;color:#fff;padding:9px 12px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+.tbl thead th.r{text-align:right}
+.tbl tbody td{padding:8px 12px;border-bottom:1px solid #EEF4FB;vertical-align:middle}
+.tbl tbody td.r{text-align:right;font-variant-numeric:tabular-nums}
+.tbl tbody tr:hover td{background:#f4f8ff}
+.tbl tbody tr:nth-child(even) td{background:#fafcff}
+.tbl tbody tr:nth-child(even):hover td{background:#f4f8ff}
+
+/* Badge */
+.badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:600;white-space:nowrap}
+.bg{background:#DFF6DD;color:#107C10}
+.ba{background:#FFF9C4;color:#7D6608}
+.br{background:#FDE7E9;color:#A4262C}
+.bb{background:#EEF4FB;color:#2E75B6}
+
+/* Rank disc */
+.rnk{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:#4472C4;color:#fff;font-size:11px;font-weight:700}
+.rnk-1{background:#ED7D31}
+.rnk-2{background:#2E75B6}
+.rnk-3{background:#4472C4}
+
+/* Chart wrappers */
+.ch{position:relative;height:260px}
+.ch-lg{position:relative;height:320px}
+
+/* Heatmap */
+.hm-wrap{overflow-x:auto;margin-top:12px}
+.hm{border-collapse:collapse;font-size:10px;white-space:nowrap}
+.hm thead th{background:#1F3864;color:#fff;padding:3px 4px;text-align:center;font-size:9px;font-weight:600;min-width:28px}
+.hm thead th.vh{text-align:left;min-width:110px;padding:4px 10px;font-size:11px}
+.hm tbody td{width:30px;height:22px;text-align:center;border:1px solid #e8eef4;font-size:9px;font-variant-numeric:tabular-nums}
+.hm tbody td.vl{background:#EEF4FB;color:#1F3864;font-weight:700;text-align:left;padding:3px 10px;font-size:11px;min-width:110px}
+.h0{background:#F5F5F5;color:#d0d0d0}
+.h1{background:#DBEAFE;color:#1e3a8a}
+.h2{background:#93C5FD;color:#1e3a8a}
+.h3{background:#3B82F6;color:#fff}
+.h4{background:#1E3A8A;color:#fff}
+
+/* Legend */
+.leg{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:#555;margin-top:10px}
+.leg-i{display:flex;align-items:center;gap:5px}
+.leg-d{width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.1)}
+
+/* OP highlight */
+.op-row td{background:#DFF6DD !important;color:#107C10;font-weight:600}
+
+/* Footer */
+.footer{text-align:center;padding:14px;font-size:11px;color:#999;background:#e8edf3}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-left">
+    <h1>&#x1F69A; Olympic Paints &mdash; Fleet Dashboard</h1>
+    <p id="hdr-period"></p>
+  </div>
+  <div class="hdr-right" id="hdr-meta"></div>
+</div>
+
+<div class="kpi-strip" id="kpi-strip"></div>
+
+<div class="tab-nav">
+  <div class="tab-btn active"  onclick="tab('overview',this)">Overview</div>
+  <div class="tab-btn"         onclick="tab('activity',this)">Activity Matrix</div>
+  <div class="tab-btn"         onclick="tab('monthly',this)">Monthly</div>
+  <div class="tab-btn"         onclick="tab('routes',this)">Routes</div>
+</div>
+
+<!-- OVERVIEW -->
+<div id="pane-overview" class="tab-pane active">
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">Total KM per Vehicle</div>
+      <div class="ch"><canvas id="ch-km"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Total Hours per Vehicle</div>
+      <div class="ch"><canvas id="ch-hrs"></canvas></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Fleet Rankings</div>
+    <div style="overflow-x:auto">
+      <table class="tbl" id="tbl-rank"></table>
+    </div>
+  </div>
+</div>
+
+<!-- ACTIVITY MATRIX -->
+<div id="pane-activity" class="tab-pane">
+  <div class="card">
+    <div class="card-title">Daily KM Activity Heatmap</div>
+    <div class="leg">
+      <div class="leg-i"><div class="leg-d" style="background:#F5F5F5"></div>No activity</div>
+      <div class="leg-i"><div class="leg-d" style="background:#DBEAFE"></div>&le;100 km</div>
+      <div class="leg-i"><div class="leg-d" style="background:#93C5FD"></div>101&ndash;200 km</div>
+      <div class="leg-i"><div class="leg-d" style="background:#3B82F6"></div>201&ndash;300 km</div>
+      <div class="leg-i"><div class="leg-d" style="background:#1E3A8A"></div>&gt;300 km</div>
+    </div>
+    <div class="hm-wrap">
+      <table class="hm" id="tbl-hm"></table>
+    </div>
+  </div>
+</div>
+
+<!-- MONTHLY -->
+<div id="pane-monthly" class="tab-pane">
+  <div class="card">
+    <div class="card-title">Monthly KM per Vehicle</div>
+    <div class="ch-lg"><canvas id="ch-monthly"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Monthly Breakdown</div>
+    <div style="overflow-x:auto">
+      <table class="tbl" id="tbl-monthly"></table>
+    </div>
+  </div>
+</div>
+
+<!-- ROUTES -->
+<div id="pane-routes" class="tab-pane">
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">Top Destinations (day end-points)</div>
+      <table class="tbl" id="tbl-dest"></table>
+    </div>
+    <div class="card">
+      <div class="card-title">Top Origins (day start-points)</div>
+      <table class="tbl" id="tbl-orig"></table>
+    </div>
+  </div>
+</div>
+
+<div class="footer" id="footer"></div>
+
+<script>
+const D = {"period": "02/03/2026 – 21/04/2026", "period_days": 51, "generated": "05 May 2026 10:52", "excel": "VehicleInOut_Mar2026_Apr2026.xlsx", "fleet": {"total_km": 79414.8, "total_hrs": 2489.5, "avg_util": 63.9, "avg_rtb": 88.8, "n_vehicles": 7}, "stats": [{"vehicle": "MJ35FPGP", "days_active": 34, "total_km": 17289.8, "avg_km_day": 508.5, "max_km_day": 1291.3, "total_hrs": 484.4, "avg_hrs_day": 14.2, "kmph": 35.7, "utilisation": 66.7, "rtb_n": 31, "rtb_pct": 91.2}, {"vehicle": "KW40KZGP", "days_active": 36, "total_km": 17059.0, "avg_km_day": 473.9, "max_km_day": 1270.0, "total_hrs": 503.2, "avg_hrs_day": 14.0, "kmph": 33.9, "utilisation": 70.6, "rtb_n": 35, "rtb_pct": 97.2}, {"vehicle": "LJ92TGGP", "days_active": 34, "total_km": 12646.0, "avg_km_day": 371.9, "max_km_day": 1240.0, "total_hrs": 338.3, "avg_hrs_day": 10.0, "kmph": 37.4, "utilisation": 66.7, "rtb_n": 25, "rtb_pct": 73.5}, {"vehicle": "KW57WWGP", "days_active": 30, "total_km": 12451.0, "avg_km_day": 415.0, "max_km_day": 1003.0, "total_hrs": 387.8, "avg_hrs_day": 12.9, "kmph": 32.1, "utilisation": 58.8, "rtb_n": 27, "rtb_pct": 90.0}, {"vehicle": "LJ92TDGP", "days_active": 30, "total_km": 11705.0, "avg_km_day": 390.2, "max_km_day": 1103.0, "total_hrs": 345.4, "avg_hrs_day": 11.5, "kmph": 33.9, "utilisation": 58.8, "rtb_n": 21, "rtb_pct": 70.0}, {"vehicle": "DH33HLGP", "days_active": 34, "total_km": 5523.0, "avg_km_day": 162.4, "max_km_day": 821.0, "total_hrs": 242.6, "avg_hrs_day": 7.1, "kmph": 22.8, "utilisation": 66.7, "rtb_n": 34, "rtb_pct": 100.0}, {"vehicle": "CR61GCGP", "days_active": 30, "total_km": 2741.0, "avg_km_day": 91.4, "max_km_day": 362.0, "total_hrs": 187.8, "avg_hrs_day": 6.3, "kmph": 14.6, "utilisation": 58.8, "rtb_n": 30, "rtb_pct": 100.0}], "vehicles": ["CR61GCGP", "DH33HLGP", "KW40KZGP", "KW57WWGP", "LJ92TDGP", "LJ92TGGP", "MJ35FPGP"], "activity": {"dates": ["02/03", "03/03", "04/03", "05/03", "06/03", "09/03", "10/03", "11/03", "12/03", "13/03", "16/03", "17/03", "18/03", "19/03", "20/03", "23/03", "24/03", "25/03", "26/03", "27/03", "30/03", "31/03", "01/04", "02/04", "03/04", "07/04", "08/04", "09/04", "10/04", "11/04", "13/04", "14/04", "15/04", "16/04", "17/04", "18/04", "19/04", "20/04", "21/04"], "matrix": {"CR61GCGP": [0.0, 10.0, 29.0, 23.0, 131.0, 67.0, 160.0, 23.0, 125.0, 82.0, 130.0, 362.0, 147.0, 150.0, 136.0, 156.0, 64.0, 193.0, 90.0, 117.0, 128.0, 143.0, 13.0, 0.0, 0.0, 20.0, 0.0, 17.0, 33.0, 0.0, 30.0, 90.0, 10.0, 0.0, 62.0, 0.0, 0.0, 0.0, 0.0], "DH33HLGP": [12.0, 1.0, 170.0, 0.0, 0.0, 3.0, 2.0, 728.0, 534.0, 407.0, 105.0, 821.0, 0.0, 77.0, 97.0, 6.0, 628.0, 295.0, 78.0, 115.0, 0.0, 84.0, 353.0, 0.0, 0.0, 0.0, 11.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 386.0, 150.0, 0.0, 0.0, 0.0, 458.0], "KW40KZGP": [6.0, 1270.0, 1.0, 258.0, 753.0, 803.0, 774.0, 346.0, 622.0, 405.0, 1.0, 273.0, 752.0, 50.0, 0.0, 128.0, 689.0, 135.0, 164.0, 943.0, 128.0, 5.0, 1018.0, 141.0, 0.0, 995.0, 757.0, 328.0, 252.0, 0.0, 137.0, 810.0, 1080.0, 925.0, 1030.0, 0.0, 0.0, 721.0, 359.0], "KW57WWGP": [0.0, 209.0, 840.0, 755.0, 528.0, 692.0, 224.0, 587.0, 68.0, 108.0, 650.0, 0.0, 109.0, 727.0, 693.0, 56.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 955.0, 736.0, 0.0, 198.0, 674.0, 127.0, 198.0, 0.0, 1003.0, 648.0, 555.0, 705.0, 3.0, 0.0, 0.0, 403.0, 0.0], "LJ92TDGP": [122.0, 235.0, 268.0, 760.0, 0.0, 0.0, 0.0, 83.0, 0.0, 28.0, 0.0, 35.0, 0.0, 73.0, 1.0, 753.0, 600.0, 893.0, 107.0, 291.0, 0.0, 0.0, 0.0, 754.0, 0.0, 573.0, 1072.0, 969.0, 357.0, 135.0, 126.0, 0.0, 727.0, 300.0, 1103.0, 0.0, 0.0, 842.0, 498.0], "LJ92TGGP": [171.0, 1112.0, 329.0, 342.0, 264.0, 1234.0, 183.0, 0.0, 0.0, 212.0, 234.0, 413.0, 151.0, 0.0, 0.0, 1.0, 0.0, 0.0, 112.0, 932.0, 0.0, 18.0, 115.0, 1079.0, 7.0, 1240.0, 68.0, 153.0, 765.0, 0.0, 268.0, 640.0, 424.0, 334.0, 632.0, 6.0, 0.0, 1101.0, 106.0], "MJ35FPGP": [293.7, 1063.5, 237.2, 388.0, 1098.4, 547.2, 755.4, 1174.2, 1.7, 1123.5, 133.7, 645.9, 544.9, 552.1, 559.1, 6.8, 1134.4, 50.1, 412.2, 0.0, 0.3, 0.2, 1134.6, 1291.3, 0.0, 712.7, 102.6, 689.8, 251.4, 0.0, 641.0, 313.2, 560.7, 1.2, 77.0, 0.0, 0.0, 150.9, 640.9]}}, "monthly": {"months": ["Mar 2026", "Apr 2026"], "data": {"CR61GCGP": {"Mar 2026": {"km": 2466.0, "hrs": 160.5, "days": 22}, "Apr 2026": {"km": 275.0, "hrs": 27.3, "days": 8}}, "DH33HLGP": {"Mar 2026": {"km": 4163.0, "hrs": 168.8, "days": 21}, "Apr 2026": {"km": 1360.0, "hrs": 73.9, "days": 13}}, "KW40KZGP": {"Mar 2026": {"km": 8506.0, "hrs": 284.1, "days": 22}, "Apr 2026": {"km": 8553.0, "hrs": 219.1, "days": 14}}, "KW57WWGP": {"Mar 2026": {"km": 6246.0, "hrs": 229.9, "days": 18}, "Apr 2026": {"km": 6205.0, "hrs": 157.9, "days": 12}}, "LJ92TDGP": {"Mar 2026": {"km": 4249.0, "hrs": 153.9, "days": 17}, "Apr 2026": {"km": 7456.0, "hrs": 191.5, "days": 13}}, "LJ92TGGP": {"Mar 2026": {"km": 5708.0, "hrs": 152.5, "days": 19}, "Apr 2026": {"km": 6938.0, "hrs": 185.8, "days": 15}}, "MJ35FPGP": {"Mar 2026": {"km": 10722.5, "hrs": 299.7, "days": 21}, "Apr 2026": {"km": 6567.3, "hrs": 184.7, "days": 13}}}}, "routes": {"destinations": [{"name": "Olympic Paints Factory, Anchorville", "count": 209, "pct": 91.7}, {"name": "Flamingo Street Lenasia Suburbs, Lenasia", "count": 2, "pct": 0.9}, {"name": "Mogoditshane Outlying, Mogoditshane Outlying (Kweneng)", "count": 2, "pct": 0.9}, {"name": "Industry Road Isando, Isando", "count": 2, "pct": 0.9}, {"name": "Korokoro Street Waterval East, Rustenburg Outlying (North West)", "count": 1, "pct": 0.4}, {"name": "B202 Kanye, Southern (Southern)", "count": 1, "pct": 0.4}, {"name": "South-East, South-east (South-East)", "count": 1, "pct": 0.4}, {"name": "Near 27 Mecca Road, Anchorville", "count": 1, "pct": 0.4}, {"name": "Near 224A Medical Road, Randjespark Ext 136", "count": 1, "pct": 0.4}, {"name": "Lejara Road Broadhurst Industrial, Broadhurst Industrial (South-East)", "count": 1, "pct": 0.4}, {"name": "Near 224A Medical Road, Erand Ah Ext 1", "count": 1, "pct": 0.4}, {"name": "Near 246 Protea Avenue, Lenasia Ext 7", "count": 1, "pct": 0.4}, {"name": "Taung, South-east (South-East)", "count": 1, "pct": 0.4}, {"name": "Polokwane Local Municipality, Limpopo (Limpopo)", "count": 1, "pct": 0.4}, {"name": "Botha Street W Modjadiskloof, Limpopo (Limpopo)", "count": 1, "pct": 0.4}, {"name": "Wolhuterskop Trading, Primindia (North West)", "count": 1, "pct": 0.4}, {"name": "Keyter Street Rosendal, Rosendal (Free State)", "count": 1, "pct": 0.4}], "origins": [{"name": "Olympic Paints Factory, Anchorville", "count": 212, "pct": 93.0}, {"name": "Flamingo Street Lenasia Suburbs, Lenasia", "count": 2, "pct": 0.9}, {"name": "Mogoditshane Outlying, Mogoditshane Outlying (Kweneng)", "count": 2, "pct": 0.9}, {"name": "Industry Road Isando, Isando", "count": 2, "pct": 0.9}, {"name": "South-East, South-east (South-East)", "count": 1, "pct": 0.4}, {"name": "Korokoro Street Waterval East, Rustenburg Outlying (North West)", "count": 1, "pct": 0.4}, {"name": "Kanye, Southern (Southern)", "count": 1, "pct": 0.4}, {"name": "Near 27 Mecca Road, Anchorville", "count": 1, "pct": 0.4}, {"name": "Near 224A Medical Road, Randjespark Ext 136", "count": 1, "pct": 0.4}, {"name": "Lejara Road Broadhurst Industrial, Broadhurst Industrial (South-East)", "count": 1, "pct": 0.4}, {"name": "Near 224A Medical Road, Erand Ah Ext 1", "count": 1, "pct": 0.4}, {"name": "Near 246 Protea Avenue, Lenasia Ext 7", "count": 1, "pct": 0.4}, {"name": "Taung, South-east (South-East)", "count": 1, "pct": 0.4}, {"name": "Myka Trade 2 Mankweng, Limpopo (Limpopo)", "count": 1, "pct": 0.4}]}};
+
+// ── Tab switching ──────────────────────────────────────────────────────────────
+function tab(name, btn) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('pane-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── Header ─────────────────────────────────────────────────────────────────────
+document.getElementById('hdr-period').textContent =
+  'Period: ' + D.period + '  •  ' + D.period_days + ' calendar days  •  ' + D.fleet.n_vehicles + ' vehicles tracked';
+document.getElementById('hdr-meta').innerHTML =
+  'Updated: ' + D.generated + '<br>Source: ' + D.excel;
+document.getElementById('footer').textContent =
+  'Olympic Paints Fleet Dashboard · Generated ' + D.generated + ' · ' + D.excel;
+
+// ── KPI Strip ──────────────────────────────────────────────────────────────────
+const kpis = [
+  {lbl:'Total Fleet KM',  val: D.fleet.total_km.toLocaleString('en-ZA',{maximumFractionDigits:0}) + ' km', sub:'fleet total'},
+  {lbl:'Total Hours',     val: D.fleet.total_hrs.toLocaleString('en-ZA',{maximumFractionDigits:0}) + ' hrs', sub:'behind the wheel'},
+  {lbl:'Avg Utilisation', val: D.fleet.avg_util + '%', sub:'fleet average'},
+  {lbl:'Return-to-Base',  val: D.fleet.avg_rtb  + '%', sub:'fleet average'},
+  {lbl:'Vehicles',        val: D.fleet.n_vehicles, sub: D.period_days + '-day period'},
+];
+document.getElementById('kpi-strip').innerHTML = kpis.map(k =>
+  '<div class="kpi"><div class="kpi-lbl">'+k.lbl+'</div><div class="kpi-val">'+k.val+'</div><div class="kpi-sub">'+k.sub+'</div></div>'
+).join('');
+
+// ── Colour palette ─────────────────────────────────────────────────────────────
+const PAL = ['#4472C4','#ED7D31','#A9D18E','#FF6B6B','#FFC000','#2E75B6','#70AD47','#9B59B6'];
+
+// ── KM Chart ───────────────────────────────────────────────────────────────────
+new Chart(document.getElementById('ch-km'), {
+  type: 'bar',
+  data: {
+    labels: D.stats.map(s => s.vehicle),
+    datasets: [{
+      label: 'Total KM',
+      data: D.stats.map(s => s.total_km),
+      backgroundColor: D.stats.map((_, i) => PAL[i % PAL.length]),
+      borderRadius: 5,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {legend:{display:false}},
+    scales: {y:{beginAtZero:true, title:{display:true,text:'Kilometres'}}}
+  }
+});
+
+// ── Hours Chart ────────────────────────────────────────────────────────────────
+new Chart(document.getElementById('ch-hrs'), {
+  type: 'bar',
+  data: {
+    labels: D.stats.map(s => s.vehicle),
+    datasets: [{
+      label: 'Total Hours',
+      data: D.stats.map(s => s.total_hrs),
+      backgroundColor: '#ED7D31',
+      borderRadius: 5,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {legend:{display:false}},
+    scales: {y:{beginAtZero:true, title:{display:true,text:'Hours'}}}
+  }
+});
+
+// ── Rankings Table ─────────────────────────────────────────────────────────────
+document.getElementById('tbl-rank').innerHTML =
+  '<thead><tr>' +
+    '<th>Rank</th><th>Vehicle</th>' +
+    '<th class="r">Total KM</th><th class="r">Avg KM/Day</th><th class="r">Max Day KM</th>' +
+    '<th class="r">Total Hrs</th><th class="r">KM/Hr</th>' +
+    '<th class="r">Utilisation</th><th class="r">RTB %</th>' +
+  '</tr></thead>' +
+  '<tbody>' + D.stats.map((s, i) => {
+    const ub = s.utilisation >= 70 ? 'bg' : s.utilisation >= 40 ? 'ba' : 'br';
+    const rb = s.rtb_pct     >= 80 ? 'bg' : s.rtb_pct     >= 50 ? 'ba' : 'br';
+    const rc = i < 3 ? 'rnk rnk-'+(i+1) : 'rnk';
+    return '<tr>' +
+      '<td><span class="'+rc+'">'+(i+1)+'</span></td>' +
+      '<td><strong>'+s.vehicle+'</strong></td>' +
+      '<td class="r">'+s.total_km.toLocaleString('en-ZA')+'</td>' +
+      '<td class="r">'+s.avg_km_day+'</td>' +
+      '<td class="r">'+s.max_km_day+'</td>' +
+      '<td class="r">'+s.total_hrs+'</td>' +
+      '<td class="r">'+s.kmph+'</td>' +
+      '<td class="r"><span class="badge '+ub+'">'+s.utilisation+'%</span></td>' +
+      '<td class="r"><span class="badge '+rb+'">'+s.rtb_pct+'%</span></td>' +
+    '</tr>';
+  }).join('') + '</tbody>';
+
+// ── Activity Heatmap ───────────────────────────────────────────────────────────
+function hmClass(km) {
+  if (km <= 0)   return 'h0';
+  if (km <= 100) return 'h1';
+  if (km <= 200) return 'h2';
+  if (km <= 300) return 'h3';
+  return 'h4';
+}
+const dates = D.activity.dates;
+document.getElementById('tbl-hm').innerHTML =
+  '<thead><tr><th class="vh">Vehicle</th>' +
+  dates.map(d => '<th>'+d+'</th>').join('') +
+  '</tr></thead>' +
+  '<tbody>' + D.vehicles.map(veh => {
+    const kms = D.activity.matrix[veh] || [];
+    return '<tr><td class="vl">'+veh+'</td>' +
+      kms.map(km => {
+        const cls = hmClass(km);
+        const txt = km > 0 ? Math.round(km) : '';
+        return '<td class="'+cls+'">'+txt+'</td>';
+      }).join('') + '</tr>';
+  }).join('') + '</tbody>';
+
+// ── Monthly Chart ──────────────────────────────────────────────────────────────
+const months = D.monthly.months;
+new Chart(document.getElementById('ch-monthly'), {
+  type: 'bar',
+  data: {
+    labels: months,
+    datasets: D.vehicles.map((veh, i) => ({
+      label: veh,
+      data: months.map(m => (D.monthly.data[veh] && D.monthly.data[veh][m]) ? D.monthly.data[veh][m].km : 0),
+      backgroundColor: PAL[i % PAL.length],
+      borderRadius: 3,
+    }))
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {legend:{position:'right'}},
+    scales: {y:{beginAtZero:true, title:{display:true,text:'Kilometres'}}}
+  }
+});
+
+// ── Monthly Table ──────────────────────────────────────────────────────────────
+document.getElementById('tbl-monthly').innerHTML =
+  '<thead>' +
+    '<tr><th>Vehicle</th>' + months.map(m => '<th class="r" colspan="3">'+m+'</th>').join('') + '<th class="r">Total KM</th></tr>' +
+    '<tr><th></th>' + months.map(() => '<th class="r">KM</th><th class="r">Hrs</th><th class="r">Days</th>').join('') + '<th></th></tr>' +
+  '</thead>' +
+  '<tbody>' + D.vehicles.map(veh => {
+    const s = D.stats.find(x => x.vehicle === veh) || {};
+    return '<tr><td><strong>'+veh+'</strong></td>' +
+      months.map(m => {
+        const md = (D.monthly.data[veh] && D.monthly.data[veh][m]) || {km:0,hrs:0,days:0};
+        return '<td class="r">'+md.km+'</td><td class="r">'+md.hrs+'</td><td class="r">'+md.days+'</td>';
+      }).join('') +
+      '<td class="r"><strong>'+(s.total_km||0)+'</strong></td></tr>';
+  }).join('') + '</tbody>';
+
+// ── Route Tables ───────────────────────────────────────────────────────────────
+function routeTable(id, rows) {
+  document.getElementById(id).innerHTML =
+    '<thead><tr><th>#</th><th>Location</th><th class="r">Days</th><th class="r">%</th></tr></thead>' +
+    '<tbody>' + rows.map((r, i) => {
+      const op = r.name.toLowerCase().includes('olympic') || r.name.toLowerCase().includes('anchorville');
+      return '<tr class="'+(op?'op-row':'')+'">' +
+        '<td>'+(i+1)+'</td><td>'+r.name+'</td>' +
+        '<td class="r">'+r.count+'</td><td class="r">'+r.pct+'%</td>' +
+      '</tr>';
+    }).join('') + '</tbody>';
+}
+routeTable('tbl-dest', D.routes.destinations);
+routeTable('tbl-orig', D.routes.origins);
+</script>
+</body>
+</html>

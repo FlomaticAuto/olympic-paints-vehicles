@@ -1,124 +1,250 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="theme-dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Olympic Paints - Fleet Dashboard</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<title>Fleet Dashboard — Olympic Paints</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script>var t=localStorage.getItem('oly-theme');if(t)document.documentElement.className=t;</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
+/* ── RAW DESIGN TOKENS ─────────────────────────────────────────── */
+:root {
+  --_y50:#FEF9E0; --_y100:#FDF0A0; --_y200:#FAE04D;
+  --_y400:#F5C400; --_y600:#D4A800; --_y800:#A88000; --_y900:#6A5000;
+  --_n50:#E8EFF8; --_n100:#B8CCE8; --_n300:#6B9ED0;
+  --_n500:#2D6BA8; --_n700:#1A3D6E; --_n900:#0D2040; --_n950:#071022;
+  --_g0:#FFFFFF; --_g50:#F7F6F3; --_g100:#E8E7E2; --_g200:#C8C7C0;
+  --_g400:#949390; --_g600:#5C5B58; --_g800:#2E2E2C;
+  --_g900:#1A1A18; --_g950:#0D0D0B;
+  --_teal:#2D8C7A; --_teal-light:#C8EDE7; --_teal-dark:#1a5c50;
+  --_terra:#C97A3A; --_terra-light:#F7E0C8;
+  --_coral:#E86060; --_coral-light:#FDDCDC;
+  --_pink:#E87BAD; --_pink-light:#FCE4EF;
+  --_violet:#9B7DBF; --_violet-light:#EDE0F7;
+  --_sage:#7A8C55; --_ink:#5C6B7A;
+  --font-display:'Barlow Condensed',sans-serif;
+  --font-body:'Barlow',sans-serif;
+  --r-sm:4px; --r-md:8px; --r-lg:12px; --r-xl:16px; --r-pill:50px;
+}
+/* ── LIGHT THEME ──────────────────────────────────────────────── */
+.theme-light {
+  color-scheme:light;
+  --color-surface-page:var(--_g50); --color-surface-base:var(--_g0);
+  --color-surface-elevated:var(--_g0); --color-surface-sunken:var(--_g100);
+  --color-surface-overlay:rgba(0,0,0,0.04);
+  --color-surface-brand:var(--_y400); --color-surface-secondary:var(--_n700);
+  --color-text-primary:var(--_g950); --color-text-secondary:var(--_g600);
+  --color-text-tertiary:var(--_g400); --color-text-on-brand:var(--_g950);
+  --color-text-on-navy:var(--_g0);
+  --color-brand-primary:var(--_y400); --color-brand-hover:var(--_y600);
+  --color-brand-secondary:var(--_n700); --color-brand-accent:var(--_y400);
+  --color-border-subtle:var(--_g100); --color-border-default:var(--_g200);
+  --color-border-strong:var(--_g400); --color-border-brand:var(--_y400);
+  --color-success-bg:#EDF7F5; --color-success-fg:var(--_teal-dark); --color-success-bd:var(--_teal);
+  --color-warning-bg:var(--_y50); --color-warning-fg:var(--_y900); --color-warning-bd:var(--_y600);
+  --color-danger-bg:#FEF2F2; --color-danger-fg:#C0392B; --color-danger-bd:var(--_coral);
+  --color-info-bg:var(--_n50); --color-info-fg:var(--_n700); --color-info-bd:var(--_n500);
+  --color-neutral-bg:var(--_g100); --color-neutral-fg:var(--_g600); --color-neutral-bd:var(--_g400);
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.08); --shadow-md:0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg:0 10px 30px rgba(0,0,0,0.10); --shadow-brand:0 4px 16px rgba(245,196,0,0.20);
+}
+/* ── DARK THEME ───────────────────────────────────────────────── */
+.theme-dark {
+  color-scheme:dark;
+  --color-surface-page:var(--_g950); --color-surface-base:var(--_g900);
+  --color-surface-elevated:var(--_g800); --color-surface-sunken:var(--_g950);
+  --color-surface-overlay:rgba(255,255,255,0.04);
+  --color-surface-brand:var(--_y400); --color-surface-secondary:var(--_n700);
+  --color-text-primary:var(--_g100); --color-text-secondary:var(--_g400);
+  --color-text-tertiary:var(--_g600); --color-text-on-brand:var(--_g950);
+  --color-text-on-navy:var(--_g0);
+  --color-brand-primary:var(--_y400); --color-brand-hover:var(--_y200);
+  --color-brand-secondary:var(--_n700); --color-brand-accent:var(--_y400);
+  --color-border-subtle:rgba(255,255,255,0.06); --color-border-default:rgba(255,255,255,0.10);
+  --color-border-strong:rgba(255,255,255,0.20); --color-border-brand:var(--_y400);
+  --color-success-bg:rgba(45,140,122,0.12); --color-success-fg:var(--_teal-light); --color-success-bd:rgba(45,140,122,0.30);
+  --color-warning-bg:rgba(245,196,0,0.10); --color-warning-fg:var(--_y200); --color-warning-bd:rgba(245,196,0,0.25);
+  --color-danger-bg:rgba(232,96,96,0.12); --color-danger-fg:var(--_coral-light); --color-danger-bd:rgba(232,96,96,0.30);
+  --color-info-bg:rgba(26,61,110,0.30); --color-info-fg:var(--_n100); --color-info-bd:rgba(107,158,208,0.30);
+  --color-neutral-bg:rgba(255,255,255,0.05); --color-neutral-fg:var(--_g400); --color-neutral-bd:rgba(255,255,255,0.10);
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.40); --shadow-md:0 4px 12px rgba(0,0,0,0.40);
+  --shadow-lg:0 10px 30px rgba(0,0,0,0.50); --shadow-brand:0 4px 20px rgba(245,196,0,0.15);
+}
+/* ── BRAND THEME ──────────────────────────────────────────────── */
+.theme-brand {
+  color-scheme:light;
+  --color-surface-page:var(--_y400); --color-surface-base:var(--_y200);
+  --color-surface-elevated:var(--_y50); --color-surface-sunken:var(--_y600);
+  --color-surface-overlay:rgba(0,0,0,0.05);
+  --color-surface-brand:var(--_y400); --color-surface-secondary:var(--_g950);
+  --color-text-primary:var(--_g950); --color-text-secondary:var(--_y900);
+  --color-text-tertiary:var(--_y800); --color-text-on-brand:var(--_g950);
+  --color-text-on-navy:var(--_g0);
+  --color-brand-primary:var(--_g950); --color-brand-hover:var(--_n700);
+  --color-brand-secondary:var(--_n700); --color-brand-accent:var(--_g950);
+  --color-border-subtle:rgba(0,0,0,0.08); --color-border-default:rgba(0,0,0,0.14);
+  --color-border-strong:rgba(0,0,0,0.25); --color-border-brand:var(--_g950);
+  --color-success-bg:rgba(45,140,122,0.12); --color-success-fg:var(--_teal-dark); --color-success-bd:var(--_teal);
+  --color-warning-bg:rgba(0,0,0,0.08); --color-warning-fg:var(--_y900); --color-warning-bd:var(--_y900);
+  --color-danger-bg:rgba(232,96,96,0.12); --color-danger-fg:#C0392B; --color-danger-bd:var(--_coral);
+  --color-info-bg:rgba(26,61,110,0.10); --color-info-fg:var(--_n900); --color-info-bd:var(--_n700);
+  --color-neutral-bg:rgba(0,0,0,0.06); --color-neutral-fg:var(--_y900); --color-neutral-bd:rgba(0,0,0,0.15);
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.12); --shadow-md:0 4px 12px rgba(0,0,0,0.14);
+  --shadow-lg:0 10px 30px rgba(0,0,0,0.18); --shadow-brand:0 4px 16px rgba(0,0,0,0.15);
+}
+/* ── NAVY EXECUTIVE THEME ─────────────────────────────────────── */
+.theme-navy {
+  color-scheme:dark;
+  --color-surface-page:var(--_n950); --color-surface-base:var(--_n900);
+  --color-surface-elevated:var(--_n700); --color-surface-sunken:var(--_n950);
+  --color-surface-overlay:rgba(255,255,255,0.04);
+  --color-surface-brand:var(--_y400); --color-surface-secondary:var(--_n700);
+  --color-text-primary:var(--_g0); --color-text-secondary:var(--_n100);
+  --color-text-tertiary:var(--_n300); --color-text-on-brand:var(--_g950);
+  --color-text-on-navy:var(--_g0);
+  --color-brand-primary:var(--_y400); --color-brand-hover:var(--_y200);
+  --color-brand-secondary:var(--_n500); --color-brand-accent:var(--_y400);
+  --color-border-subtle:rgba(107,158,208,0.12); --color-border-default:rgba(107,158,208,0.20);
+  --color-border-strong:rgba(107,158,208,0.35); --color-border-brand:var(--_y400);
+  --color-success-bg:rgba(45,140,122,0.15); --color-success-fg:var(--_teal-light); --color-success-bd:rgba(45,140,122,0.35);
+  --color-warning-bg:rgba(245,196,0,0.12); --color-warning-fg:var(--_y200); --color-warning-bd:rgba(245,196,0,0.30);
+  --color-danger-bg:rgba(232,96,96,0.14); --color-danger-fg:var(--_coral-light); --color-danger-bd:rgba(232,96,96,0.35);
+  --color-info-bg:rgba(45,107,168,0.20); --color-info-fg:var(--_n100); --color-info-bd:rgba(107,158,208,0.35);
+  --color-neutral-bg:rgba(255,255,255,0.05); --color-neutral-fg:var(--_n300); --color-neutral-bd:rgba(255,255,255,0.12);
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.50); --shadow-md:0 4px 12px rgba(0,0,0,0.50);
+  --shadow-lg:0 10px 30px rgba(0,0,0,0.60); --shadow-brand:0 4px 20px rgba(245,196,0,0.18);
+}
+/* ── RESET & BASE ─────────────────────────────────────────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:"Segoe UI",Arial,sans-serif;background:#f0f4f8;color:#1a2332;min-height:100vh}
-
-.hdr{background:#1F3864;color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.hdr-left h1{font-size:20px;font-weight:700;letter-spacing:.3px}
-.hdr-left p{font-size:12px;opacity:.75;margin-top:3px}
-.hdr-right{text-align:right;font-size:11px;opacity:.7;line-height:1.6}
-
-.kpi-strip{background:#2E75B6;padding:12px 24px;display:flex;gap:10px;flex-wrap:wrap}
-.kpi{background:#1F3864;border-radius:8px;padding:12px 18px;flex:1;min-width:140px;text-align:center}
-.kpi-lbl{font-size:10px;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.6px}
-.kpi-val{font-size:26px;font-weight:700;color:#fff;margin-top:4px;line-height:1}
-.kpi-sub{font-size:10px;color:rgba(255,255,255,.5);margin-top:3px}
-
-.tab-nav{background:#1F3864;display:flex;padding:0 20px;border-bottom:2px solid #2E75B6;flex-wrap:wrap}
-.tab-btn{padding:11px 18px;color:rgba(255,255,255,.65);cursor:pointer;border-bottom:3px solid transparent;font-size:13px;font-weight:500;transition:all .2s;user-select:none}
-.tab-btn:hover{color:#fff}
-.tab-btn.active{color:#fff;border-bottom-color:#ED7D31}
-
-.tab-pane{display:none;padding:20px 24px}
+body{font-family:var(--font-body);background:var(--color-surface-page);color:var(--color-text-primary);min-height:100vh}
+/* ── THEME BAR ────────────────────────────────────────────────── */
+.theme-bar{display:flex;gap:4px;padding:6px 16px;background:var(--color-surface-secondary);align-items:center}
+.theme-bar button{padding:4px 12px;border:1px solid var(--color-border-default);border-radius:var(--r-pill);background:transparent;color:var(--color-text-on-navy);font-family:var(--font-body);font-size:11px;font-weight:500;cursor:pointer;transition:all .15s;opacity:.65}
+.theme-bar button:hover{opacity:1;background:var(--color-surface-overlay)}
+.theme-bar button.active{opacity:1;background:var(--color-brand-primary);color:var(--color-text-on-brand);border-color:var(--color-brand-primary)}
+/* ── HEADER ───────────────────────────────────────────────────── */
+.hdr{background:var(--color-surface-secondary);color:var(--color-text-on-navy);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.hdr-brand{display:flex;align-items:center;gap:12px}
+.hdr-brand h1{font-family:var(--font-display);font-size:22px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:var(--color-text-on-navy)}
+.hdr-brand p{font-size:12px;opacity:.75;margin-top:2px;font-family:var(--font-body);color:var(--color-text-on-navy)}
+.hdr-meta{text-align:right;font-size:11px;opacity:.7;line-height:1.6;font-family:var(--font-body);color:var(--color-text-on-navy)}
+/* ── KPI STRIP ────────────────────────────────────────────────── */
+.kpi-strip{background:var(--color-surface-page);padding:12px 24px;display:flex;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--color-border-subtle)}
+.kpi{background:var(--color-surface-elevated);border-radius:var(--r-md);padding:12px 18px;flex:1;min-width:140px;text-align:center;border:1px solid var(--color-border-subtle)}
+.kpi-lbl{font-family:var(--font-body);font-size:10px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.08em;font-weight:500}
+.kpi-val{font-family:var(--font-display);font-size:28px;font-weight:900;color:var(--color-brand-primary);margin-top:4px;line-height:1}
+.kpi-sub{font-size:10px;color:var(--color-text-tertiary);margin-top:3px;font-family:var(--font-body)}
+/* ── TAB NAV ──────────────────────────────────────────────────── */
+.tab-nav{background:var(--color-surface-base);display:flex;padding:0 20px;border-bottom:1px solid var(--color-border-default);flex-wrap:wrap}
+.tab-btn{padding:11px 18px;color:var(--color-text-secondary);cursor:pointer;border-bottom:3px solid transparent;font-family:var(--font-body);font-size:13px;font-weight:500;transition:all .2s;user-select:none}
+.tab-btn:hover{color:var(--color-text-primary)}
+.tab-btn.active{color:var(--color-brand-primary);border-bottom-color:var(--color-brand-primary)}
+/* ── TAB PANES ────────────────────────────────────────────────── */
+.tab-pane{display:none;padding:20px 24px;background:var(--color-surface-page)}
 .tab-pane.active{display:block}
-
-.card{background:#fff;border-radius:8px;padding:18px 20px;margin-bottom:18px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
-.card-title{font-size:12px;font-weight:700;color:#1F3864;text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #EEF4FB}
-
+/* ── CARDS ────────────────────────────────────────────────────── */
+.card{background:var(--color-surface-base);border-radius:var(--r-lg);padding:18px 20px;margin-bottom:18px;box-shadow:var(--shadow-md);border:1px solid var(--color-border-subtle)}
+.card-title{font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.12em;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--color-border-default)}
+.card-note{font-size:12px;color:var(--color-text-secondary);margin-bottom:14px;line-height:1.5}
+/* ── GRID HELPERS ─────────────────────────────────────────────── */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
 @media(max-width:1000px){.g3{grid-template-columns:1fr 1fr}}
 @media(max-width:860px){.g2,.g3{grid-template-columns:1fr}}
-
-.tbl{width:100%;border-collapse:collapse;font-size:13px}
-.tbl thead th{background:#1F3864;color:#fff;padding:9px 12px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+/* ── TABLES ───────────────────────────────────────────────────── */
+.tbl{width:100%;border-collapse:collapse;font-size:13px;font-family:var(--font-body)}
+.tbl thead th{background:var(--color-surface-secondary);color:var(--color-text-on-navy);padding:9px 12px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;font-family:var(--font-display)}
 .tbl thead th.r{text-align:right}
-.tbl tbody td{padding:8px 12px;border-bottom:1px solid #EEF4FB;vertical-align:middle}
+.tbl tbody td{padding:8px 12px;border-bottom:1px solid var(--color-border-subtle);vertical-align:middle;color:var(--color-text-primary)}
 .tbl tbody td.r{text-align:right;font-variant-numeric:tabular-nums}
-.tbl tbody tr:hover td{background:#f4f8ff}
-.tbl tbody tr:nth-child(even) td{background:#fafcff}
-.tbl tbody tr:nth-child(even):hover td{background:#f4f8ff}
-
-.badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:600;white-space:nowrap}
-.bg{background:#DFF6DD;color:#107C10}
-.ba{background:#FFF9C4;color:#7D6608}
-.br{background:#FDE7E9;color:#A4262C}
-.bb{background:#EEF4FB;color:#2E75B6}
-
-.rnk{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:#4472C4;color:#fff;font-size:11px;font-weight:700}
-.rnk-1{background:#ED7D31}
-.rnk-2{background:#2E75B6}
-.rnk-3{background:#4472C4}
-
+.tbl tbody tr:hover td{background:var(--color-surface-overlay)}
+.tbl tbody tr:nth-child(even) td{background:var(--color-surface-sunken)}
+.tbl tbody tr:nth-child(even):hover td{background:var(--color-surface-overlay)}
+/* ── BADGES ───────────────────────────────────────────────────── */
+.badge{display:inline-block;padding:2px 9px;border-radius:var(--r-pill);font-size:11px;font-weight:600;white-space:nowrap;font-family:var(--font-body)}
+.bg{background:var(--color-success-bg);color:var(--color-success-fg);border:1px solid var(--color-success-bd)}
+.ba{background:var(--color-warning-bg);color:var(--color-warning-fg);border:1px solid var(--color-warning-bd)}
+.br{background:var(--color-danger-bg);color:var(--color-danger-fg);border:1px solid var(--color-danger-bd)}
+.bb{background:var(--color-info-bg);color:var(--color-info-fg);border:1px solid var(--color-info-bd)}
+/* ── RANK CIRCLES ─────────────────────────────────────────────── */
+.rnk{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--color-surface-elevated);color:var(--color-text-secondary);font-size:11px;font-weight:700;font-family:var(--font-display)}
+.rnk-1{background:var(--color-brand-primary);color:var(--color-text-on-brand)}
+.rnk-2{background:var(--color-brand-secondary);color:var(--color-text-on-navy)}
+.rnk-3{background:var(--_teal);color:var(--_g0)}
+/* ── CHART CONTAINERS ─────────────────────────────────────────── */
 .ch{position:relative;height:260px}
 .ch-lg{position:relative;height:340px}
 .ch-xl{position:relative;height:420px}
-
+/* ── HEATMAP (data-viz intensity — raw tokens) ────────────────── */
 .hm-wrap{overflow-x:auto;margin-top:12px}
 .hm{border-collapse:collapse;font-size:10px;white-space:nowrap}
-.hm thead th{background:#1F3864;color:#fff;padding:3px 4px;text-align:center;font-size:9px;font-weight:600;min-width:28px}
+.hm thead th{background:var(--color-surface-secondary);color:var(--color-text-on-navy);padding:3px 4px;text-align:center;font-size:9px;font-weight:600;min-width:28px;font-family:var(--font-display)}
 .hm thead th.vh{text-align:left;min-width:110px;padding:4px 10px;font-size:11px}
-.hm tbody td{width:30px;height:22px;text-align:center;border:1px solid #e8eef4;font-size:9px;font-variant-numeric:tabular-nums}
-.hm tbody td.vl{background:#EEF4FB;color:#1F3864;font-weight:700;text-align:left;padding:3px 10px;font-size:11px;min-width:110px}
-.h0{background:#F5F5F5;color:#d0d0d0}
-.h1{background:#DBEAFE;color:#1e3a8a}
-.h2{background:#93C5FD;color:#1e3a8a}
-.h3{background:#3B82F6;color:#fff}
-.h4{background:#1E3A8A;color:#fff}
-
-.leg{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:#555;margin-top:10px}
+.hm tbody td{width:30px;height:22px;text-align:center;border:1px solid var(--color-border-subtle);font-size:9px;font-variant-numeric:tabular-nums}
+.hm tbody td.vl{background:var(--color-surface-elevated);color:var(--color-text-primary);font-weight:700;text-align:left;padding:3px 10px;font-size:11px;min-width:110px;font-family:var(--font-display)}
+.h0{background:var(--_g800);color:var(--_g600)}
+.h1{background:var(--_n900);color:var(--_n300)}
+.h2{background:var(--_n700);color:var(--_n100)}
+.h3{background:var(--_n500);color:var(--_g0)}
+.h4{background:var(--_y400);color:var(--_g950)}
+/* ── HEATMAP LEGEND ───────────────────────────────────────────── */
+.leg{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--color-text-secondary);margin-top:10px;font-family:var(--font-body)}
 .leg-i{display:flex;align-items:center;gap:5px}
-.leg-d{width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.1)}
-
-.op-row td{background:#DFF6DD !important;color:#107C10;font-weight:600}
-
-/* Crew tab specific */
-.truck-card{background:#fff;border-radius:10px;padding:18px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-left:5px solid #2E75B6}
-.truck-card.no-crew{border-left-color:#ccc}
+.leg-d{width:14px;height:14px;border-radius:3px;border:1px solid var(--color-border-default)}
+/* ── ROUTES TABLE ─────────────────────────────────────────────── */
+.op-row td{background:var(--color-success-bg) !important;color:var(--color-success-fg);font-weight:600}
+/* ── TRUCK CARDS ──────────────────────────────────────────────── */
+.truck-card{background:var(--color-surface-base);border-radius:var(--r-lg);padding:18px;margin-bottom:16px;box-shadow:var(--shadow-md);border:1px solid var(--color-border-subtle);border-left:4px solid var(--color-brand-secondary)}
+.truck-card.no-crew{border-left-color:var(--color-border-strong)}
 .truck-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
-.truck-plate{font-size:18px;font-weight:700;color:#1F3864;letter-spacing:.5px}
-.truck-meta{display:flex;gap:12px;font-size:12px;color:#555}
-.truck-meta span{background:#EEF4FB;padding:3px 10px;border-radius:12px;font-weight:600;color:#2E75B6}
-.crew-row{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid #f0f4f8;gap:12px;flex-wrap:wrap}
+.truck-plate{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--color-text-primary);letter-spacing:.5px;text-transform:uppercase}
+.truck-meta{display:flex;gap:8px;flex-wrap:wrap;font-size:12px;margin-top:6px}
+.truck-meta span{background:var(--color-surface-elevated);padding:3px 10px;border-radius:var(--r-pill);font-weight:600;color:var(--color-text-secondary);border:1px solid var(--color-border-subtle);font-family:var(--font-body)}
+.crew-row{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid var(--color-border-subtle);gap:12px;flex-wrap:wrap}
 .crew-row:last-child{border-bottom:none}
-.crew-role{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;width:70px;flex-shrink:0}
-.crew-role.driver{color:#1F3864}
-.crew-role.asst{color:#4472C4}
-.crew-name{font-size:13px;font-weight:600;flex:1;min-width:150px}
-.crew-hrs{text-align:right;min-width:60px;font-size:13px;font-variant-numeric:tabular-nums;font-weight:700;color:#1F3864}
-.crew-days{font-size:11px;color:#888;min-width:60px}
-.crew-gap{font-size:12px;font-weight:600;min-width:80px;text-align:right}
-.gap-pos{color:#A4262C}
-.gap-neg{color:#107C10}
-.no-match{color:#bbb;font-style:italic;font-size:12px}
-.truck-hrs-bar{margin-top:12px}
-.bar-label{font-size:11px;color:#666;margin-bottom:3px}
-.bar-track{background:#EEF4FB;border-radius:4px;height:10px;position:relative;overflow:hidden;margin-bottom:6px}
-.bar-fill-gps{background:#2E75B6;height:100%;border-radius:4px;transition:width .4s}
-.bar-fill-crew{background:#ED7D31;height:100%;border-radius:4px;transition:width .4s}
-
-.summary-stat{display:flex;gap:6px;align-items:center;font-size:12px;color:#555;margin-top:8px}
-.summary-stat strong{color:#1F3864}
-
-.no-crew-note{color:#888;font-style:italic;font-size:13px;padding:8px 0}
-
-.footer{text-align:center;padding:14px;font-size:11px;color:#999;background:#e8edf3}
+.crew-role{font-family:var(--font-display);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;width:80px;flex-shrink:0}
+.crew-role.driver{color:var(--color-brand-primary)}
+.crew-role.asst{color:var(--color-text-secondary)}
+.crew-name{font-size:13px;font-weight:600;flex:1;min-width:150px;color:var(--color-text-primary);font-family:var(--font-body)}
+.crew-hrs{text-align:right;min-width:60px;font-size:13px;font-variant-numeric:tabular-nums;font-weight:700;color:var(--color-brand-primary);font-family:var(--font-display)}
+.crew-days{font-size:11px;color:var(--color-text-secondary);min-width:60px}
+.crew-gap{font-size:12px;font-weight:600;min-width:80px;text-align:right;font-family:var(--font-body)}
+.gap-pos{color:var(--color-danger-fg)}
+.gap-neg{color:var(--color-success-fg)}
+.no-match{color:var(--color-text-tertiary);font-style:italic;font-size:12px}
+.truck-hrs-bar{margin-top:12px;margin-bottom:8px}
+.bar-label{font-size:11px;color:var(--color-text-secondary);margin-bottom:3px;font-family:var(--font-body)}
+.bar-track{background:var(--color-surface-sunken);border-radius:var(--r-sm);height:10px;overflow:hidden;margin-bottom:6px}
+.bar-fill-gps{background:var(--color-brand-secondary);height:100%;border-radius:var(--r-sm);transition:width .4s}
+.bar-fill-crew{background:var(--color-brand-primary);height:100%;border-radius:var(--r-sm);transition:width .4s}
+.no-crew-note{color:var(--color-text-tertiary);font-style:italic;font-size:13px;padding:8px 0}
+/* ── FOOTER ───────────────────────────────────────────────────── */
+.footer{text-align:center;padding:14px;font-size:11px;color:var(--color-text-tertiary);background:var(--color-surface-sunken);border-top:1px solid var(--color-border-subtle);font-family:var(--font-body)}
 </style>
 </head>
 <body>
 
+<div class="theme-bar">
+  <button onclick="olyTheme('theme-light',this)">Light</button>
+  <button onclick="olyTheme('theme-dark',this)" class="active">Dark</button>
+  <button onclick="olyTheme('theme-brand',this)">Brand</button>
+  <button onclick="olyTheme('theme-navy',this)">Navy</button>
+</div>
+
 <div class="hdr">
-  <div class="hdr-left">
-    <h1>&#x1F69A; Olympic Paints &mdash; Fleet Dashboard</h1>
-    <p id="hdr-period"></p>
+  <div class="hdr-brand">
+    <div style="width:48px;height:48px;border-radius:50%;overflow:hidden;flex-shrink:0;">
+      <img src="logo.jpg" alt="Olympic Paints" width="48" height="48" style="display:block;width:100%;height:100%;object-fit:cover;">
+    </div>
+    <div>
+      <h1>Fleet Dashboard</h1>
+      <p id="hdr-period"></p>
+    </div>
   </div>
-  <div class="hdr-right" id="hdr-meta"></div>
+  <div class="hdr-meta" id="hdr-meta"></div>
 </div>
 
 <div class="kpi-strip" id="kpi-strip"></div>
@@ -153,7 +279,7 @@ body{font-family:"Segoe UI",Arial,sans-serif;background:#f0f4f8;color:#1a2332;mi
 <div id="pane-crew" class="tab-pane">
   <div class="card">
     <div class="card-title">GPS Truck Hours vs Crew Clocking Hours</div>
-    <p style="font-size:12px;color:#666;margin-bottom:14px">
+    <p class="card-note">
       GPS hours = time the truck was tracked on route (aligned window only).
       Crew clocking hours = biometric clock-in/out from the HAVEN system, counted <strong>only on days the truck was GPS-active</strong>.
       The depot gap = crew labor on trip days that was not spent driving (loading, waiting, unloading).
@@ -172,11 +298,11 @@ body{font-family:"Segoe UI",Arial,sans-serif;background:#f0f4f8;color:#1a2332;mi
   <div class="card">
     <div class="card-title">Daily KM Activity Heatmap</div>
     <div class="leg">
-      <div class="leg-i"><div class="leg-d" style="background:#F5F5F5"></div>No activity</div>
-      <div class="leg-i"><div class="leg-d" style="background:#DBEAFE"></div>&le;100 km</div>
-      <div class="leg-i"><div class="leg-d" style="background:#93C5FD"></div>101&ndash;200 km</div>
-      <div class="leg-i"><div class="leg-d" style="background:#3B82F6"></div>201&ndash;300 km</div>
-      <div class="leg-i"><div class="leg-d" style="background:#1E3A8A"></div>&gt;300 km</div>
+      <div class="leg-i"><div class="leg-d" style="background:#2E2E2C"></div>No activity</div>
+      <div class="leg-i"><div class="leg-d" style="background:#0D2040"></div>&le;100 km</div>
+      <div class="leg-i"><div class="leg-d" style="background:#1A3D6E"></div>101&ndash;200 km</div>
+      <div class="leg-i"><div class="leg-d" style="background:#2D6BA8"></div>201&ndash;300 km</div>
+      <div class="leg-i"><div class="leg-d" style="background:#F5C400"></div>&gt;300 km</div>
     </div>
     <div class="hm-wrap"><table class="hm" id="tbl-hm"></table></div>
   </div>
@@ -213,7 +339,14 @@ body{font-family:"Segoe UI",Arial,sans-serif;background:#f0f4f8;color:#1a2332;mi
 <script>
 const D = {"period": "02/03/2026 - 21/04/2026", "period_days": 51, "generated": "05 May 2026 12:37", "excel": "VehicleInOut_Mar2026_Apr2026.xlsx", "fleet": {"total_km": 79414.8, "total_hrs": 2489.5, "avg_util": 63.9, "avg_rtb": 88.8, "n_vehicles": 7}, "stats": [{"vehicle": "MJ35FPGP", "days_active": 34, "total_km": 17289.8, "avg_km_day": 508.5, "max_km_day": 1291.3, "total_hrs": 484.4, "avg_hrs_day": 14.2, "kmph": 35.7, "utilisation": 66.7, "rtb_n": 31, "rtb_pct": 91.2}, {"vehicle": "KW40KZGP", "days_active": 36, "total_km": 17059.0, "avg_km_day": 473.9, "max_km_day": 1270.0, "total_hrs": 503.2, "avg_hrs_day": 14.0, "kmph": 33.9, "utilisation": 70.6, "rtb_n": 35, "rtb_pct": 97.2}, {"vehicle": "LJ92TGGP", "days_active": 34, "total_km": 12646.0, "avg_km_day": 371.9, "max_km_day": 1240.0, "total_hrs": 338.3, "avg_hrs_day": 10.0, "kmph": 37.4, "utilisation": 66.7, "rtb_n": 25, "rtb_pct": 73.5}, {"vehicle": "KW57WWGP", "days_active": 30, "total_km": 12451.0, "avg_km_day": 415.0, "max_km_day": 1003.0, "total_hrs": 387.8, "avg_hrs_day": 12.9, "kmph": 32.1, "utilisation": 58.8, "rtb_n": 27, "rtb_pct": 90.0}, {"vehicle": "LJ92TDGP", "days_active": 30, "total_km": 11705.0, "avg_km_day": 390.2, "max_km_day": 1103.0, "total_hrs": 345.4, "avg_hrs_day": 11.5, "kmph": 33.9, "utilisation": 58.8, "rtb_n": 21, "rtb_pct": 70.0}, {"vehicle": "DH33HLGP", "days_active": 34, "total_km": 5523.0, "avg_km_day": 162.4, "max_km_day": 821.0, "total_hrs": 242.6, "avg_hrs_day": 7.1, "kmph": 22.8, "utilisation": 66.7, "rtb_n": 34, "rtb_pct": 100.0}, {"vehicle": "CR61GCGP", "days_active": 30, "total_km": 2741.0, "avg_km_day": 91.4, "max_km_day": 362.0, "total_hrs": 187.8, "avg_hrs_day": 6.3, "kmph": 14.6, "utilisation": 58.8, "rtb_n": 30, "rtb_pct": 100.0}], "vehicles": ["CR61GCGP", "DH33HLGP", "KW40KZGP", "KW57WWGP", "LJ92TDGP", "LJ92TGGP", "MJ35FPGP"], "activity": {"dates": ["02/03", "03/03", "04/03", "05/03", "06/03", "09/03", "10/03", "11/03", "12/03", "13/03", "16/03", "17/03", "18/03", "19/03", "20/03", "23/03", "24/03", "25/03", "26/03", "27/03", "30/03", "31/03", "01/04", "02/04", "03/04", "07/04", "08/04", "09/04", "10/04", "11/04", "13/04", "14/04", "15/04", "16/04", "17/04", "18/04", "19/04", "20/04", "21/04"], "matrix": {"CR61GCGP": [0.0, 10.0, 29.0, 23.0, 131.0, 67.0, 160.0, 23.0, 125.0, 82.0, 130.0, 362.0, 147.0, 150.0, 136.0, 156.0, 64.0, 193.0, 90.0, 117.0, 128.0, 143.0, 13.0, 0.0, 0.0, 20.0, 0.0, 17.0, 33.0, 0.0, 30.0, 90.0, 10.0, 0.0, 62.0, 0.0, 0.0, 0.0, 0.0], "DH33HLGP": [12.0, 1.0, 170.0, 0.0, 0.0, 3.0, 2.0, 728.0, 534.0, 407.0, 105.0, 821.0, 0.0, 77.0, 97.0, 6.0, 628.0, 295.0, 78.0, 115.0, 0.0, 84.0, 353.0, 0.0, 0.0, 0.0, 11.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 386.0, 150.0, 0.0, 0.0, 0.0, 458.0], "KW40KZGP": [6.0, 1270.0, 1.0, 258.0, 753.0, 803.0, 774.0, 346.0, 622.0, 405.0, 1.0, 273.0, 752.0, 50.0, 0.0, 128.0, 689.0, 135.0, 164.0, 943.0, 128.0, 5.0, 1018.0, 141.0, 0.0, 995.0, 757.0, 328.0, 252.0, 0.0, 137.0, 810.0, 1080.0, 925.0, 1030.0, 0.0, 0.0, 721.0, 359.0], "KW57WWGP": [0.0, 209.0, 840.0, 755.0, 528.0, 692.0, 224.0, 587.0, 68.0, 108.0, 650.0, 0.0, 109.0, 727.0, 693.0, 56.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 955.0, 736.0, 0.0, 198.0, 674.0, 127.0, 198.0, 0.0, 1003.0, 648.0, 555.0, 705.0, 3.0, 0.0, 0.0, 403.0, 0.0], "LJ92TDGP": [122.0, 235.0, 268.0, 760.0, 0.0, 0.0, 0.0, 83.0, 0.0, 28.0, 0.0, 35.0, 0.0, 73.0, 1.0, 753.0, 600.0, 893.0, 107.0, 291.0, 0.0, 0.0, 0.0, 754.0, 0.0, 573.0, 1072.0, 969.0, 357.0, 135.0, 126.0, 0.0, 727.0, 300.0, 1103.0, 0.0, 0.0, 842.0, 498.0], "LJ92TGGP": [171.0, 1112.0, 329.0, 342.0, 264.0, 1234.0, 183.0, 0.0, 0.0, 212.0, 234.0, 413.0, 151.0, 0.0, 0.0, 1.0, 0.0, 0.0, 112.0, 932.0, 0.0, 18.0, 115.0, 1079.0, 7.0, 1240.0, 68.0, 153.0, 765.0, 0.0, 268.0, 640.0, 424.0, 334.0, 632.0, 6.0, 0.0, 1101.0, 106.0], "MJ35FPGP": [293.7, 1063.5, 237.2, 388.0, 1098.4, 547.2, 755.4, 1174.2, 1.7, 1123.5, 133.7, 645.9, 544.9, 552.1, 559.1, 6.8, 1134.4, 50.1, 412.2, 0.0, 0.3, 0.2, 1134.6, 1291.3, 0.0, 712.7, 102.6, 689.8, 251.4, 0.0, 641.0, 313.2, 560.7, 1.2, 77.0, 0.0, 0.0, 150.9, 640.9]}}, "monthly": {"months": ["Mar 2026", "Apr 2026"], "data": {"CR61GCGP": {"Mar 2026": {"km": 2466.0, "hrs": 160.5, "days": 22}, "Apr 2026": {"km": 275.0, "hrs": 27.3, "days": 8}}, "DH33HLGP": {"Mar 2026": {"km": 4163.0, "hrs": 168.8, "days": 21}, "Apr 2026": {"km": 1360.0, "hrs": 73.9, "days": 13}}, "KW40KZGP": {"Mar 2026": {"km": 8506.0, "hrs": 284.1, "days": 22}, "Apr 2026": {"km": 8553.0, "hrs": 219.1, "days": 14}}, "KW57WWGP": {"Mar 2026": {"km": 6246.0, "hrs": 229.9, "days": 18}, "Apr 2026": {"km": 6205.0, "hrs": 157.9, "days": 12}}, "LJ92TDGP": {"Mar 2026": {"km": 4249.0, "hrs": 153.9, "days": 17}, "Apr 2026": {"km": 7456.0, "hrs": 191.5, "days": 13}}, "LJ92TGGP": {"Mar 2026": {"km": 5708.0, "hrs": 152.5, "days": 19}, "Apr 2026": {"km": 6938.0, "hrs": 185.8, "days": 15}}, "MJ35FPGP": {"Mar 2026": {"km": 10722.5, "hrs": 299.7, "days": 21}, "Apr 2026": {"km": 6567.3, "hrs": 184.7, "days": 13}}}}, "routes": {"destinations": [{"name": "Olympic Paints Factory, Anchorville", "count": 209, "pct": 91.7}, {"name": "Flamingo Street Lenasia Suburbs, Lenasia", "count": 2, "pct": 0.9}, {"name": "Mogoditshane Outlying, Mogoditshane Outlying (Kweneng)", "count": 2, "pct": 0.9}, {"name": "Industry Road Isando, Isando", "count": 2, "pct": 0.9}, {"name": "Korokoro Street Waterval East, Rustenburg Outlying (North West)", "count": 1, "pct": 0.4}, {"name": "B202 Kanye, Southern (Southern)", "count": 1, "pct": 0.4}, {"name": "South-East, South-east (South-East)", "count": 1, "pct": 0.4}, {"name": "Near 27 Mecca Road, Anchorville", "count": 1, "pct": 0.4}, {"name": "Near 224A Medical Road, Randjespark Ext 136", "count": 1, "pct": 0.4}, {"name": "Lejara Road Broadhurst Industrial, Broadhurst Industrial (South-East)", "count": 1, "pct": 0.4}, {"name": "Near 224A Medical Road, Erand Ah Ext 1", "count": 1, "pct": 0.4}, {"name": "Near 246 Protea Avenue, Lenasia Ext 7", "count": 1, "pct": 0.4}, {"name": "Taung, South-east (South-East)", "count": 1, "pct": 0.4}, {"name": "Polokwane Local Municipality, Limpopo (Limpopo)", "count": 1, "pct": 0.4}, {"name": "Botha Street W Modjadiskloof, Limpopo (Limpopo)", "count": 1, "pct": 0.4}, {"name": "Wolhuterskop Trading, Primindia (North West)", "count": 1, "pct": 0.4}, {"name": "Keyter Street Rosendal, Rosendal (Free State)", "count": 1, "pct": 0.4}], "origins": [{"name": "Olympic Paints Factory, Anchorville", "count": 212, "pct": 93.0}, {"name": "Flamingo Street Lenasia Suburbs, Lenasia", "count": 2, "pct": 0.9}, {"name": "Mogoditshane Outlying, Mogoditshane Outlying (Kweneng)", "count": 2, "pct": 0.9}, {"name": "Industry Road Isando, Isando", "count": 2, "pct": 0.9}, {"name": "South-East, South-east (South-East)", "count": 1, "pct": 0.4}, {"name": "Korokoro Street Waterval East, Rustenburg Outlying (North West)", "count": 1, "pct": 0.4}, {"name": "Kanye, Southern (Southern)", "count": 1, "pct": 0.4}, {"name": "Near 27 Mecca Road, Anchorville", "count": 1, "pct": 0.4}, {"name": "Near 224A Medical Road, Randjespark Ext 136", "count": 1, "pct": 0.4}, {"name": "Lejara Road Broadhurst Industrial, Broadhurst Industrial (South-East)", "count": 1, "pct": 0.4}, {"name": "Near 224A Medical Road, Erand Ah Ext 1", "count": 1, "pct": 0.4}, {"name": "Near 246 Protea Avenue, Lenasia Ext 7", "count": 1, "pct": 0.4}, {"name": "Taung, South-east (South-East)", "count": 1, "pct": 0.4}, {"name": "Myka Trade 2 Mankweng, Limpopo (Limpopo)", "count": 1, "pct": 0.4}]}, "crew": {"LJ92TDGP": {"truck_hrs": 215.5, "truck_km": 7854.0, "active_days": 17, "aligned_from": "26/03/2026", "aligned_to": "21/04/2026", "driver": {"name": "Clement Mvuyisi Tetyana", "hrs": 35.5, "days": 2, "matched": true, "role": "Driver"}, "assistants": [{"name": "Philly Mapembe", "hrs": 83.7, "days": 10, "matched": true, "role": "Assistant"}, {"name": "Lehlohonolo Zwakala", "hrs": 45.2, "days": 7, "matched": true, "role": "Assistant"}], "total_crew_hrs": 164.4, "gap_hrs": -51.1}, "LJ92TGGP": {"truck_hrs": 222.7, "truck_km": 8000.0, "active_days": 19, "aligned_from": "26/03/2026", "aligned_to": "21/04/2026", "driver": {"name": "Andrew Nkosi Nelani", "hrs": 63.1, "days": 11, "matched": true, "role": "Driver"}, "assistants": [{"name": "Nhlamulo Jeff Mabunda", "hrs": 78.0, "days": 11, "matched": true, "role": "Assistant"}, {"name": "Nhlanhla Moli", "hrs": 67.5, "days": 11, "matched": true, "role": "Assistant"}], "total_crew_hrs": 208.6, "gap_hrs": -14.1}, "KW40KZGP": {"truck_hrs": 259.0, "truck_km": 9793.0, "active_days": 18, "aligned_from": "26/03/2026", "aligned_to": "21/04/2026", "driver": {"name": "Happy Simango", "hrs": 59.2, "days": 11, "matched": true, "role": "Driver"}, "assistants": [{"name": "Godfrey Mofokeng", "hrs": 118.1, "days": 12, "matched": true, "role": "Assistant"}, {"name": "Petrus Masinge", "hrs": 74.2, "days": 11, "matched": true, "role": "Assistant"}], "total_crew_hrs": 251.5, "gap_hrs": -7.5}, "KW57WWGP": {"truck_hrs": 172.9, "truck_km": 6205.0, "active_days": 14, "aligned_from": "26/03/2026", "aligned_to": "21/04/2026", "driver": {"name": "David Madakane", "hrs": 125.8, "days": 10, "matched": true, "role": "Driver"}, "assistants": [{"name": "Nephilian Matsididi", "hrs": 92.6, "days": 10, "matched": true, "role": "Assistant"}, {"name": "Nhlanhla Zikode", "hrs": 92.2, "days": 11, "matched": true, "role": "Assistant"}], "total_crew_hrs": 310.6, "gap_hrs": 137.7}, "MJ35FPGP": {"truck_hrs": 213.0, "truck_km": 6980.0, "active_days": 16, "aligned_from": "26/03/2026", "aligned_to": "21/04/2026", "driver": {"name": "Shaun Fazile", "hrs": 0.0, "days": 0, "matched": false, "role": "Driver"}, "assistants": [{"name": "Timothy Sinyolo", "hrs": 77.7, "days": 12, "matched": true, "role": "Assistant"}, {"name": "Loyiso Dlali", "hrs": 161.8, "days": 14, "matched": true, "role": "Assistant"}], "total_crew_hrs": 239.5, "gap_hrs": 26.5}, "DH33HLGP": {"truck_hrs": 98.7, "truck_km": 1637.0, "active_days": 17, "aligned_from": "26/03/2026", "aligned_to": "21/04/2026", "driver": null, "assistants": [], "total_crew_hrs": 0.0, "gap_hrs": -98.7}, "CR61GCGP": {"truck_hrs": 55.5, "truck_km": 753.0, "active_days": 12, "aligned_from": "26/03/2026", "aligned_to": "21/04/2026", "driver": null, "assistants": [], "total_crew_hrs": 0.0, "gap_hrs": -55.5}}};
 
-// ── Tab switching ───────────────────────────────────────────────────────────
+const OLY_THEMES=['theme-light','theme-dark','theme-brand','theme-navy'];
+function olyTheme(t,btn){
+  document.documentElement.classList.remove(...OLY_THEMES);
+  document.documentElement.classList.add(t);
+  localStorage.setItem('oly-theme',t);
+  document.querySelectorAll('.theme-bar button').forEach(b=>b.classList.toggle('active',b===btn));
+}
+
 function tab(name, btn) {
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -221,7 +354,6 @@ function tab(name, btn) {
   btn.classList.add('active');
 }
 
-// ── Header ──────────────────────────────────────────────────────────────────
 document.getElementById('hdr-period').textContent =
   'Period: ' + D.period + '  •  ' + D.period_days + ' calendar days  •  ' + D.fleet.n_vehicles + ' vehicles tracked';
 document.getElementById('hdr-meta').innerHTML =
@@ -229,7 +361,6 @@ document.getElementById('hdr-meta').innerHTML =
 document.getElementById('footer').textContent =
   'Olympic Paints Fleet Dashboard • Generated ' + D.generated + ' • ' + D.excel;
 
-// ── KPI Strip ───────────────────────────────────────────────────────────────
 const kpis = [
   {lbl:'Total Fleet KM',  val: D.fleet.total_km.toLocaleString('en-ZA',{maximumFractionDigits:0}) + ' km', sub:'GPS tracked'},
   {lbl:'Total GPS Hours', val: D.fleet.total_hrs.toLocaleString('en-ZA',{maximumFractionDigits:0}) + ' hrs', sub:'on road'},
@@ -241,10 +372,76 @@ document.getElementById('kpi-strip').innerHTML = kpis.map(k =>
   '<div class="kpi"><div class="kpi-lbl">'+k.lbl+'</div><div class="kpi-val">'+k.val+'</div><div class="kpi-sub">'+k.sub+'</div></div>'
 ).join('');
 
-// ── Colour palette ───────────────────────────────────────────────────────────
-const PAL = ['#4472C4','#ED7D31','#A9D18E','#FF6B6B','#FFC000','#2E75B6','#70AD47'];
+// ── Brand palette ─────────────────────────────────────────────────────────────
+const PAL = ['#F5C400','#1A3D6E','#2D8C7A','#C97A3A','#E87BAD','#9B7DBF','#5C6B7A'];
+
+// ── Chart.js defaults ─────────────────────────────────────────────────────────
+Chart.defaults.color = '#949390';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.08)';
+Chart.defaults.font.family = "'Barlow',sans-serif";
+
+// ── barLabels plugin ──────────────────────────────────────────────────────────
+const _lblMap = new Map();
+Chart.register({
+  id: 'barLabels',
+  afterDraw(chart) {
+    const opts = _lblMap.get(chart.canvas && chart.canvas.id);
+    if (!opts) return;
+    const { ctx } = chart;
+    const mode = opts.mode || 'v-top';
+    const fnt  = 'bold ' + (opts.fs || 10) + "px 'Barlow',sans-serif";
+    try {
+      chart.data.datasets.forEach((ds, i) => {
+        const meta = chart.getDatasetMeta(i);
+        if (!meta || meta.hidden) return;
+        meta.data.forEach((el, j) => {
+          if (!el || isNaN(el.x) || isNaN(el.y)) return;
+          const val  = ds.data[j];
+          if (val == null || val === 0) return;
+          const text = opts.fmt ? opts.fmt(val) : String(Math.round(val));
+          if (!text) return;
+          const base = el.base ?? el.y;
+          ctx.save(); ctx.font = fnt;
+          const textW    = ctx.measureText(text).width;
+          const inColor  = (opts.dsColors && opts.dsColors[i]) || opts.color || '#fff';
+          const outColor = Chart.defaults.color || '#949390';
+          if (mode === 'h-inside') {
+            const barW = Math.abs(el.x - base);
+            ctx.textBaseline = 'middle';
+            if (barW >= textW + 10) {
+              ctx.fillStyle = inColor; ctx.textAlign = 'center';
+              ctx.fillText(text, (el.x + base) / 2, el.y);
+            } else if (barW > 4) {
+              ctx.fillStyle = outColor;
+              ctx.textAlign = val >= 0 ? 'left' : 'right';
+              ctx.fillText(text, val >= 0 ? el.x + 4 : el.x - 4, el.y);
+            }
+          } else if (mode === 'v-stacked') {
+            const segH = Math.abs(base - el.y);
+            const fs   = opts.fs || 10;
+            if (segH >= fs + 6) {
+              ctx.fillStyle = inColor;
+              ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+              ctx.fillText(text, el.x, (el.y + base) / 2);
+            } else if (segH >= 4) {
+              ctx.fillStyle = outColor;
+              ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+              ctx.fillText(text, el.x, Math.min(el.y, base) - 2);
+            }
+          } else {
+            ctx.fillStyle = outColor;
+            ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+            ctx.fillText(text, el.x, el.y - 3);
+          }
+          ctx.restore();
+        });
+      });
+    } catch(e) {}
+  }
+});
 
 // ── KM Chart ─────────────────────────────────────────────────────────────────
+_lblMap.set('ch-km', { mode:'v-top', fmt:v=>String(Math.round(v)), fs:9 });
 new Chart(document.getElementById('ch-km'), {
   type:'bar',
   data:{
@@ -253,20 +450,23 @@ new Chart(document.getElementById('ch-km'), {
       backgroundColor:D.stats.map((_,i)=>PAL[i%PAL.length]), borderRadius:5}]
   },
   options:{responsive:true,maintainAspectRatio:false,
+    layout:{padding:{top:22}},
     plugins:{legend:{display:false}},
-    scales:{y:{beginAtZero:true,title:{display:true,text:'Kilometres'}}}}
+    scales:{y:{beginAtZero:true,title:{display:true,text:'Kilometres',color:'#949390'}}}}
 });
 
+_lblMap.set('ch-hrs', { mode:'v-stacked', fmt:v=>String(Math.round(v)), fs:9, color:'#fff' });
 new Chart(document.getElementById('ch-hrs'), {
   type:'bar',
   data:{
     labels:D.stats.map(s=>s.vehicle),
     datasets:[{label:'GPS Hours', data:D.stats.map(s=>s.total_hrs),
-      backgroundColor:'#2E75B6', borderRadius:5}]
+      backgroundColor:'#1A3D6E', borderRadius:5}]
   },
   options:{responsive:true,maintainAspectRatio:false,
+    layout:{padding:{top:22}},
     plugins:{legend:{display:false}},
-    scales:{y:{beginAtZero:true,title:{display:true,text:'Hours'}}}}
+    scales:{y:{beginAtZero:true,title:{display:true,text:'Hours',color:'#949390'}}}}
 });
 
 // ── Rankings Table ────────────────────────────────────────────────────────────
@@ -284,7 +484,7 @@ document.getElementById('tbl-rank').innerHTML =
     return '<tr>'+
       '<td><span class="'+rc+'">'+(i+1)+'</span></td>'+
       '<td><strong>'+s.vehicle+'</strong></td>'+
-      '<td style="font-size:12px;color:#555">'+dname+'</td>'+
+      '<td style="font-size:12px;color:var(--color-text-secondary)">'+dname+'</td>'+
       '<td class="r">'+s.total_km.toLocaleString('en-ZA')+'</td>'+
       '<td class="r">'+s.avg_km_day+'</td>'+
       '<td class="r">'+s.total_hrs+'</td>'+
@@ -295,51 +495,49 @@ document.getElementById('tbl-rank').innerHTML =
   }).join('')+'</tbody>';
 
 // ── CREW & HOURS TAB ──────────────────────────────────────────────────────────
-
-// Build comparison chart: GPS hrs vs driver hrs vs asst1 hrs vs asst2 hrs
 (function(){
   const trucks = Object.keys(D.crew);
-  const gpsHrs   = trucks.map(t => (D.crew[t]||{}).truck_hrs||0);
-  const drvHrs   = trucks.map(t => { const c=D.crew[t]; return c&&c.driver ? c.driver.hrs : 0; });
-  const a1Hrs    = trucks.map(t => { const c=D.crew[t]; return c&&c.assistants[0] ? c.assistants[0].hrs : 0; });
-  const a2Hrs    = trucks.map(t => { const c=D.crew[t]; return c&&c.assistants[1] ? c.assistants[1].hrs : 0; });
+  const gpsHrs = trucks.map(t => (D.crew[t]||{}).truck_hrs||0);
+  const drvHrs = trucks.map(t => { const c=D.crew[t]; return c&&c.driver ? c.driver.hrs : 0; });
+  const a1Hrs  = trucks.map(t => { const c=D.crew[t]; return c&&c.assistants[0] ? c.assistants[0].hrs : 0; });
+  const a2Hrs  = trucks.map(t => { const c=D.crew[t]; return c&&c.assistants[1] ? c.assistants[1].hrs : 0; });
 
+  _lblMap.set('ch-crew-compare', { mode:'v-stacked', fmt:v=>String(Math.round(v)), fs:8, dsColors:['#fff','#0D0D0B','#fff','#fff'] });
   new Chart(document.getElementById('ch-crew-compare'), {
     type:'bar',
     data:{
       labels: trucks,
       datasets:[
-        {label:'Truck GPS Hours',   data:gpsHrs, backgroundColor:'#2E75B6', borderRadius:4},
-        {label:'Driver Clocking',   data:drvHrs, backgroundColor:'#ED7D31', borderRadius:4},
-        {label:'Assistant 1',       data:a1Hrs,  backgroundColor:'#70AD47', borderRadius:4},
-        {label:'Assistant 2',       data:a2Hrs,  backgroundColor:'#9B59B6', borderRadius:4},
+        {label:'Truck GPS Hours', data:gpsHrs, backgroundColor:'#1A3D6E', borderRadius:4},
+        {label:'Driver Clocking', data:drvHrs, backgroundColor:'#F5C400', borderRadius:4},
+        {label:'Assistant 1',     data:a1Hrs,  backgroundColor:'#2D8C7A', borderRadius:4},
+        {label:'Assistant 2',     data:a2Hrs,  backgroundColor:'#C97A3A', borderRadius:4},
       ]
     },
     options:{
       responsive:true, maintainAspectRatio:false,
+      layout:{padding:{top:22}},
       plugins:{
         legend:{position:'top'},
         tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+' hrs'}}
       },
       scales:{
         x:{stacked:false},
-        y:{beginAtZero:true, title:{display:true,text:'Hours'}}
+        y:{beginAtZero:true, title:{display:true,text:'Hours',color:'#949390'}}
       }
     }
   });
 })();
 
-// Crew summary table
 (function(){
   const trucks = Object.keys(D.crew);
   const rows = trucks.map(t => {
     const c = D.crew[t] || {};
-    const stat = D.stats.find(s=>s.vehicle===t)||{};
     const gapCls = c.gap_hrs>0 ? 'br' : 'bg';
     const gapSign = c.gap_hrs>0 ? '+' : '';
     return '<tr>'+
       '<td><strong>'+t+'</strong></td>'+
-      '<td style="font-size:12px">'+(c.driver?c.driver.name.split(' ').slice(-1)[0]:'Unallocated')+'</td>'+
+      '<td style="font-size:12px;color:var(--color-text-secondary)">'+(c.driver?c.driver.name.split(' ').slice(-1)[0]:'Unallocated')+'</td>'+
       '<td class="r">'+c.truck_hrs+'</td>'+
       '<td class="r">'+(c.driver&&c.driver.matched?c.driver.hrs:'&mdash;')+'</td>'+
       '<td class="r">'+(c.assistants&&c.assistants.length>=1&&c.assistants[0].matched?c.assistants[0].hrs:'&mdash;')+'</td>'+
@@ -358,7 +556,6 @@ document.getElementById('tbl-rank').innerHTML =
     '</tr></thead><tbody>'+rows.join('')+'</tbody>';
 })();
 
-// Per-truck crew cards
 (function(){
   const container = document.getElementById('crew-cards');
   const trucks = Object.keys(D.crew);
@@ -371,14 +568,11 @@ document.getElementById('tbl-rank').innerHTML =
     const c = D.crew[t] || {};
     const hasCrew = c.driver || (c.assistants && c.assistants.length > 0);
     const gpsW  = Math.round((c.truck_hrs / maxHrs) * 100);
-
     let crewRows = '';
     const allPeople = [];
     if (c.driver) allPeople.push({...c.driver, role:'Driver'});
     (c.assistants||[]).forEach((a,i)=>allPeople.push({...a, role:'Assistant '+(i+1)}));
-
     allPeople.forEach(p => {
-      const pW = Math.round((p.hrs / maxHrs) * 100);
       const gap = (p.hrs - c.truck_hrs);
       const gapTxt = p.matched ? (gap>=0?'+':'')+gap.toFixed(1)+' hrs depot' : '';
       const gapCls = gap>=0?'gap-pos':'gap-neg';
@@ -394,11 +588,10 @@ document.getElementById('tbl-rank').innerHTML =
         )+
       '</div>';
     });
-
-    if (!hasCrew) {
-      crewRows = '<div class="no-crew-note">No permanent crew allocated to this truck.</div>';
-    }
-
+    if (!hasCrew) crewRows = '<div class="no-crew-note">No permanent crew allocated to this truck.</div>';
+    const depotBadge = hasCrew && c.gap_hrs > 0
+      ? '<span class="badge br">+'+c.gap_hrs+' hrs depot gap</span>'
+      : '';
     return '<div class="truck-card'+(hasCrew?'':' no-crew')+'">'+
       '<div class="truck-header">'+
         '<div>'+
@@ -408,7 +601,7 @@ document.getElementById('tbl-rank').innerHTML =
             '<span>'+c.truck_hrs+' GPS hrs</span>'+
             '<span>'+(c.active_days||0)+' trip days</span>'+
             (hasCrew?'<span>'+c.total_crew_hrs+' crew hrs</span>':'')+
-            (hasCrew&&c.gap_hrs>0?'<span style="background:#FDE7E9;color:#A4262C">+'+c.gap_hrs+' hrs depot gap</span>':'')+
+            depotBadge+
           '</div>'+
         '</div>'+
       '</div>'+
@@ -440,6 +633,7 @@ document.getElementById('tbl-hm').innerHTML=
 
 // ── Monthly Chart ─────────────────────────────────────────────────────────────
 const months=D.monthly.months;
+_lblMap.set('ch-monthly', { mode:'v-top', fmt:v=>String(Math.round(v)), fs:8 });
 new Chart(document.getElementById('ch-monthly'),{
   type:'bar',
   data:{labels:months,datasets:D.vehicles.map((veh,i)=>({
@@ -448,8 +642,9 @@ new Chart(document.getElementById('ch-monthly'),{
     backgroundColor:PAL[i%PAL.length],borderRadius:3,
   }))},
   options:{responsive:true,maintainAspectRatio:false,
+    layout:{padding:{top:22}},
     plugins:{legend:{position:'right'}},
-    scales:{y:{beginAtZero:true,title:{display:true,text:'Kilometres'}}}}
+    scales:{y:{beginAtZero:true,title:{display:true,text:'Kilometres',color:'#949390'}}}}
 });
 
 // ── Monthly Table ─────────────────────────────────────────────────────────────

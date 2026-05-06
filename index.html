@@ -148,7 +148,7 @@ body{font-family:var(--font-body);background:var(--color-surface-page);color:var
 /* ── CARDS ────────────────────────────────────────────────────── */
 .card{background:var(--color-surface-base);border-radius:var(--r-lg);padding:18px 20px;margin-bottom:18px;box-shadow:var(--shadow-md);border:1px solid var(--color-border-subtle)}
 .card-title{font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.12em;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--color-border-default)}
-.card-note{font-size:12px;color:var(--color-text-secondary);margin-bottom:14px;line-height:1.5}
+.card-note{font-size:12px;color:var(--color-text-secondary);margin-top:14px;margin-bottom:0;line-height:1.5;padding-top:12px;border-top:1px solid var(--color-border-subtle)}
 /* ── GRID HELPERS ─────────────────────────────────────────────── */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
@@ -291,19 +291,19 @@ body{font-family:var(--font-body);background:var(--color-surface-page);color:var
   <div class="g2">
     <div class="card">
       <div class="card-title">Total KM per Vehicle</div>
-      <p class="card-note"><strong>Purpose:</strong> Ranks each vehicle by total GPS-tracked kilometres over the full period — a direct measure of how much delivery work each truck completed. <strong>How to read:</strong> Taller bars indicate more active vehicles. A noticeably short bar compared to the fleet average suggests the vehicle was underutilized, off-road for maintenance, or operating on short local routes. Use KM/Hr in the Rankings table to distinguish efficient long-haul trucks from those making many short trips.</p>
       <div class="ch"><canvas id="ch-km"></canvas></div>
+      <p class="card-note"><strong>Purpose:</strong> Ranks each vehicle by total GPS-tracked kilometres over the full period — a direct measure of how much delivery work each truck completed. <strong>How to read:</strong> Taller bars indicate more active vehicles. A noticeably short bar compared to the fleet average suggests the vehicle was underutilized, off-road for maintenance, or operating on short local routes. Use KM/Hr in the Rankings table to distinguish efficient long-haul trucks from those making many short trips.</p>
     </div>
     <div class="card">
       <div class="card-title">Total GPS Hours per Vehicle</div>
-      <p class="card-note"><strong>Purpose:</strong> Shows how many hours each vehicle was tracked as moving over the period. Combined with KM, this reveals route efficiency. <strong>How to read:</strong> A vehicle with high hours but low KM is travelling slowly — typically due to heavy traffic, many short stops, or dense urban routes. For long-haul delivery trucks a healthy effective speed is 25–40 km/h; divide any vehicle's total KM by its GPS hours to see where it sits.</p>
       <div class="ch"><canvas id="ch-hrs"></canvas></div>
+      <p class="card-note"><strong>Purpose:</strong> Shows how many hours each vehicle was tracked as moving over the period. Combined with KM, this reveals route efficiency. <strong>How to read:</strong> A vehicle with high hours but low KM is travelling slowly — typically due to heavy traffic, many short stops, or dense urban routes. For long-haul delivery trucks a healthy effective speed is 25–40 km/h; divide any vehicle's total KM by its GPS hours to see where it sits.</p>
     </div>
   </div>
   <div class="card">
     <div class="card-title">Fleet Rankings</div>
-    <p class="card-note"><strong>Purpose:</strong> A single table comparing all vehicles across key performance indicators — ideal for management reviews and identifying outliers. <strong>How to read:</strong> Sorted by total KM (highest first). <strong>Utilisation</strong> = % of working days the vehicle was GPS-active (green ≥70%, amber ≥40%, red &lt;40%). <strong>RTB %</strong> = return-to-base rate — % of trip-days the truck ended back at the depot (green ≥80%, amber ≥50%, red &lt;50%). <strong>KM/Hr</strong> = effective road speed; values below 20 km/h may indicate excessive idling or stop-heavy urban routes. Gold, silver, and bronze badges mark the top 3 performers by distance.</p>
     <div style="overflow-x:auto"><table class="tbl" id="tbl-rank"></table></div>
+    <p class="card-note"><strong>Purpose:</strong> A single table comparing all vehicles across key performance indicators — ideal for management reviews and identifying outliers. <strong>How to read:</strong> Sorted by total KM (highest first). <strong>Utilisation</strong> = % of working days the vehicle was GPS-active (green ≥70%, amber ≥40%, red &lt;40%). <strong>RTB %</strong> = return-to-base rate — % of trip-days the truck ended back at the depot (green ≥80%, amber ≥50%, red &lt;50%). <strong>KM/Hr</strong> = effective road speed; values below 20 km/h may indicate excessive idling or stop-heavy urban routes. Gold, silver, and bronze badges mark the top 3 performers by distance.</p>
   </div>
 </div>
 
@@ -311,13 +311,13 @@ body{font-family:var(--font-body);background:var(--color-surface-page);color:var
 <div id="pane-crew" class="tab-pane">
   <div class="card">
     <div class="card-title">GPS Truck Hours vs Crew Clocking Hours</div>
-    <p class="card-note"><strong>Purpose:</strong> Cross-references GPS vehicle data against biometric clocking data from the HAVEN system to surface mismatches between truck movement and crew time. This is a labour-accountability check. <strong>How to read:</strong> Each vehicle shows four bars side-by-side: navy = GPS truck hours on road; yellow = driver clocking hours; teal = assistant 1 hours; terra = assistant 2 hours. All clocking hours are filtered to <strong>days the truck was GPS-active only</strong>, so depot-only days are excluded. A crew bar that is much taller than the GPS bar means crew clocked significant time before/after driving (loading, admin, unloading) — some gap is normal and expected. A very large gap (&gt;30% above GPS hours) warrants a review. GPS bars that are significantly taller than all crew bars may indicate the truck was driven without its regular crew.</p>
     <div class="ch-xl"><canvas id="ch-crew-compare"></canvas></div>
+    <p class="card-note"><strong>Purpose:</strong> Cross-references GPS vehicle data against biometric clocking data from the HAVEN system to surface mismatches between truck movement and crew time. This is a labour-accountability check. <strong>How to read:</strong> Each vehicle shows four bars side-by-side: navy = GPS truck hours on road; yellow = driver clocking hours; teal = assistant 1 hours; terra = assistant 2 hours. All clocking hours are filtered to <strong>days the truck was GPS-active only</strong>, so depot-only days are excluded. A crew bar that is much taller than the GPS bar means crew clocked significant time before/after driving (loading, admin, unloading) — some gap is normal and expected. A very large gap (&gt;30% above GPS hours) warrants a review. GPS bars that are significantly taller than all crew bars may indicate the truck was driven without its regular crew.</p>
   </div>
   <div class="card">
     <div class="card-title">Crew Blocking Summary</div>
-    <p class="card-note"><strong>Purpose:</strong> Compact table for at-a-glance comparison of GPS truck time versus individual crew clocking, per vehicle. Use this for payroll cross-checks or to flag anomalies before investigating individual truck cards below. <strong>How to read:</strong> <strong>GPS Hrs</strong> = hours the truck was on road (trip days only). <strong>Driver / Asst Hrs</strong> = biometric clocking hours for each assigned crew member, on the same trip days. <strong>Depot Gap</strong> = total crew hours minus GPS hours. A positive gap (red badge) is normal — it covers loading, waiting, and unloading time at customers. A large positive gap (&gt;50 hrs) may indicate crew clocking in well before or after truck departure. A negative gap (green badge) means crew clocked fewer hours than the truck moved — possible when a truck was run without its regular crew, or crew data is missing.</p>
     <div style="overflow-x:auto"><table class="tbl" id="tbl-crew-summary"></table></div>
+    <p class="card-note"><strong>Purpose:</strong> Compact table for at-a-glance comparison of GPS truck time versus individual crew clocking, per vehicle. Use this for payroll cross-checks or to flag anomalies before investigating individual truck cards below. <strong>How to read:</strong> <strong>GPS Hrs</strong> = hours the truck was on road (trip days only). <strong>Driver / Asst Hrs</strong> = biometric clocking hours for each assigned crew member, on the same trip days. <strong>Depot Gap</strong> = total crew hours minus GPS hours. A positive gap (red badge) is normal — it covers loading, waiting, and unloading time at customers. A large positive gap (&gt;50 hrs) may indicate crew clocking in well before or after truck departure. A negative gap (green badge) means crew clocked fewer hours than the truck moved — possible when a truck was run without its regular crew, or crew data is missing.</p>
   </div>
   <div id="crew-cards"></div>
 </div>
@@ -326,7 +326,6 @@ body{font-family:var(--font-body);background:var(--color-surface-page);color:var
 <div id="pane-activity" class="tab-pane">
   <div class="card">
     <div class="card-title">Daily KM Activity Heatmap</div>
-    <p class="card-note"><strong>Purpose:</strong> Gives a bird's-eye view of the entire fleet's activity over time — ideal for spotting patterns, gaps, and high-output days at a glance without reading numbers. <strong>How to read:</strong> Each row = one vehicle; each column = one working day. Cell colour shows how far the vehicle travelled that day: <strong>dark grey = no movement</strong>, dark navy ≤100 km, mid navy 101–200 km, bright blue 201–300 km, <strong>yellow &gt;300 km</strong> (high-intensity). Read across a row to see whether a vehicle works consistently or has large gaps. Read down a column to see how many trucks were active on a specific date — a mostly-grey column may indicate a public holiday or a fleet-wide incident.</p>
     <div class="leg">
       <div class="leg-i"><div class="leg-d" style="background:#2E2E2C"></div>No activity</div>
       <div class="leg-i"><div class="leg-d" style="background:#0D2040"></div>&le;100 km</div>
@@ -335,6 +334,7 @@ body{font-family:var(--font-body);background:var(--color-surface-page);color:var
       <div class="leg-i"><div class="leg-d" style="background:#F5C400"></div>&gt;300 km</div>
     </div>
     <div class="hm-wrap"><table class="hm" id="tbl-hm"></table></div>
+    <p class="card-note"><strong>Purpose:</strong> Gives a bird's-eye view of the entire fleet's activity over time — ideal for spotting patterns, gaps, and high-output days at a glance without reading numbers. <strong>How to read:</strong> Each row = one vehicle; each column = one working day. Cell colour shows how far the vehicle travelled that day: <strong>dark grey = no movement</strong>, dark navy ≤100 km, mid navy 101–200 km, bright blue 201–300 km, <strong>yellow &gt;300 km</strong> (high-intensity). Read across a row to see whether a vehicle works consistently or has large gaps. Read down a column to see how many trucks were active on a specific date — a mostly-grey column may indicate a public holiday or a fleet-wide incident.</p>
   </div>
 </div>
 
@@ -342,13 +342,13 @@ body{font-family:var(--font-body);background:var(--color-surface-page);color:var
 <div id="pane-monthly" class="tab-pane">
   <div class="card">
     <div class="card-title">Monthly KM per Vehicle</div>
-    <p class="card-note"><strong>Purpose:</strong> Tracks each vehicle's output month by month to reveal trends — growth, seasonal patterns, or a drop-off that needs investigation. <strong>How to read:</strong> Each colour represents one vehicle (see legend). A vehicle with a lower bar in a later month is not necessarily performing worse — check the Monthly Breakdown table below for active days. Fewer working days in a month will naturally produce lower KM totals. To compare months fairly, divide each vehicle's KM by its active days in that month.</p>
     <div class="ch-lg"><canvas id="ch-monthly"></canvas></div>
+    <p class="card-note"><strong>Purpose:</strong> Tracks each vehicle's output month by month to reveal trends — growth, seasonal patterns, or a drop-off that needs investigation. <strong>How to read:</strong> Each colour represents one vehicle (see legend). A vehicle with a lower bar in a later month is not necessarily performing worse — check the Monthly Breakdown table below for active days. Fewer working days in a month will naturally produce lower KM totals. To compare months fairly, divide each vehicle's KM by its active days in that month.</p>
   </div>
   <div class="card">
     <div class="card-title">Monthly Breakdown</div>
-    <p class="card-note"><strong>Purpose:</strong> The detailed complement to the chart above — provides raw numbers for KM, GPS hours, and active days per vehicle per month, enabling proper month-on-month normalization. <strong>How to read:</strong> Always check the <strong>Days</strong> column first. If a vehicle had 22 active days in March but only 8 in April, its April KM will naturally be much lower — that is not a performance issue. To compare efficiency across months, calculate <em>KM ÷ Days</em> for each row. The <strong>Total KM</strong> column (right) is the full-period sum and matches the Overview charts.</p>
     <div style="overflow-x:auto"><table class="tbl" id="tbl-monthly"></table></div>
+    <p class="card-note"><strong>Purpose:</strong> The detailed complement to the chart above — provides raw numbers for KM, GPS hours, and active days per vehicle per month, enabling proper month-on-month normalization. <strong>How to read:</strong> Always check the <strong>Days</strong> column first. If a vehicle had 22 active days in March but only 8 in April, its April KM will naturally be much lower — that is not a performance issue. To compare efficiency across months, calculate <em>KM ÷ Days</em> for each row. The <strong>Total KM</strong> column (right) is the full-period sum and matches the Overview charts.</p>
   </div>
 </div>
 
@@ -357,13 +357,13 @@ body{font-family:var(--font-body);background:var(--color-surface-page);color:var
   <div class="g2">
     <div class="card">
       <div class="card-title">Top Destinations (day end-points)</div>
-      <p class="card-note"><strong>Purpose:</strong> Shows where each truck's GPS route ended at close of day. Identifies the most common delivery endpoints and flags vehicles that did not return to base. <strong>How to read:</strong> The Olympic Paints Factory (Anchorville) should dominate — it confirms that vehicles returned to the depot. Rows highlighted in green are factory returns. Non-factory destinations represent overnight stops, cross-border deliveries, or routes that finished at a customer site. A high count of non-factory destinations for a specific vehicle is worth investigating.</p>
       <table class="tbl" id="tbl-dest"></table>
+      <p class="card-note"><strong>Purpose:</strong> Shows where each truck's GPS route ended at close of day. Identifies the most common delivery endpoints and flags vehicles that did not return to base. <strong>How to read:</strong> The Olympic Paints Factory (Anchorville) should dominate — it confirms that vehicles returned to the depot. Rows highlighted in green are factory returns. Non-factory destinations represent overnight stops, cross-border deliveries, or routes that finished at a customer site. A high count of non-factory destinations for a specific vehicle is worth investigating.</p>
     </div>
     <div class="card">
       <div class="card-title">Top Origins (day start-points)</div>
-      <p class="card-note"><strong>Purpose:</strong> Shows where each tracked route began. Confirms that vehicles are dispatching from the factory and identifies trucks that started their day away from the depot. <strong>How to read:</strong> Green-highlighted rows are factory dispatches (normal). Non-factory origins mean the vehicle was parked overnight at a remote location from the previous day's run. Cross-referencing origins against destinations on a date-by-date basis lets you reconstruct multi-day routes and confirm driver reconciliation.</p>
       <table class="tbl" id="tbl-orig"></table>
+      <p class="card-note"><strong>Purpose:</strong> Shows where each tracked route began. Confirms that vehicles are dispatching from the factory and identifies trucks that started their day away from the depot. <strong>How to read:</strong> Green-highlighted rows are factory dispatches (normal). Non-factory origins mean the vehicle was parked overnight at a remote location from the previous day's run. Cross-referencing origins against destinations on a date-by-date basis lets you reconstruct multi-day routes and confirm driver reconciliation.</p>
     </div>
   </div>
 </div>

@@ -148,7 +148,7 @@ body{font-family:var(--font-body);background:var(--color-surface-page);color:var
 /* ── CARDS ────────────────────────────────────────────────────── */
 .card{background:var(--color-surface-base);border-radius:var(--r-lg);padding:18px 20px;margin-bottom:18px;box-shadow:var(--shadow-md);border:1px solid var(--color-border-subtle)}
 .card-title{font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.12em;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--color-border-default)}
-.card-note{font-size:12px;color:var(--color-text-secondary);margin-top:14px;margin-bottom:0;line-height:1.5;padding-top:12px;border-top:1px solid var(--color-border-subtle)}
+.card-note{font-size:12px;color:var(--color-text-secondary);margin-bottom:14px;line-height:1.5}
 /* ── GRID HELPERS ─────────────────────────────────────────────── */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
@@ -221,12 +221,6 @@ body{font-family:var(--font-body);background:var(--color-surface-page);color:var
 .bar-fill-gps{background:var(--color-brand-secondary);height:100%;border-radius:var(--r-sm);transition:width .4s}
 .bar-fill-crew{background:var(--color-brand-primary);height:100%;border-radius:var(--r-sm);transition:width .4s}
 .no-crew-note{color:var(--color-text-tertiary);font-style:italic;font-size:13px;padding:8px 0}
-/* ── KPI GUIDE BAR ────────────────────────────────────────────── */
-.kpi-guide{background:var(--color-surface-base);padding:8px 24px 12px;display:flex;gap:0;flex-wrap:wrap;border-bottom:1px solid var(--color-border-subtle)}
-.kpi-guide-item{flex:1;min-width:160px;padding:8px 16px 8px 0;border-right:1px solid var(--color-border-subtle);margin-right:16px}
-.kpi-guide-item:last-child{border-right:none;margin-right:0}
-.kpi-guide-term{font-family:var(--font-display);font-size:10px;font-weight:700;color:var(--color-brand-primary);text-transform:uppercase;letter-spacing:.1em}
-.kpi-guide-desc{font-size:11px;color:var(--color-text-secondary);line-height:1.45;margin-top:3px}
 /* ── FOOTER ───────────────────────────────────────────────────── */
 .footer{text-align:center;padding:14px;font-size:11px;color:var(--color-text-tertiary);background:var(--color-surface-sunken);border-top:1px solid var(--color-border-subtle);font-family:var(--font-body)}
 </style>
@@ -255,28 +249,7 @@ body{font-family:var(--font-body);background:var(--color-surface-page);color:var
 
 <div class="kpi-strip" id="kpi-strip"></div>
 
-<div class="kpi-guide">
-  <div class="kpi-guide-item">
-    <div class="kpi-guide-term">Total Fleet KM</div>
-    <div class="kpi-guide-desc">Cumulative GPS-tracked distance across all vehicles for the period. A direct measure of total delivery work done — higher means more ground covered.</div>
-  </div>
-  <div class="kpi-guide-item">
-    <div class="kpi-guide-term">Total GPS Hours</div>
-    <div class="kpi-guide-desc">Total hours all vehicles were tracked as moving. Compare against crew clocking hours (Crew tab) to see how much time was spent on road vs at the depot.</div>
-  </div>
-  <div class="kpi-guide-item">
-    <div class="kpi-guide-term">Avg Utilisation</div>
-    <div class="kpi-guide-desc">Average percentage of working days each vehicle was GPS-active, across the fleet. 100% = every vehicle used every working day. Low scores indicate idle or off-road trucks.</div>
-  </div>
-  <div class="kpi-guide-item">
-    <div class="kpi-guide-term">Return-to-Base %</div>
-    <div class="kpi-guide-desc">Percentage of trip-days where the vehicle's GPS route ended back at the factory depot. Low scores flag overnight away-stops, multi-day cross-border runs, or missing end-of-day GPS data.</div>
-  </div>
-  <div class="kpi-guide-item">
-    <div class="kpi-guide-term">Vehicles Tracked</div>
-    <div class="kpi-guide-desc">Number of distinct fleet vehicles with GPS data in this reporting period. Use to sanity-check that no trucks are missing from the dataset.</div>
-  </div>
-</div>
+<div id="fleet-summary" style="padding:0 24px 4px;background:var(--color-surface-page)"></div>
 
 <div class="tab-nav">
   <div class="tab-btn active" onclick="tab('overview',this)">Overview</div>
@@ -292,18 +265,15 @@ body{font-family:var(--font-body);background:var(--color-surface-page);color:var
     <div class="card">
       <div class="card-title">Total KM per Vehicle</div>
       <div class="ch"><canvas id="ch-km"></canvas></div>
-      <p class="card-note"><strong>Purpose:</strong> Ranks each vehicle by total GPS-tracked kilometres over the full period — a direct measure of how much delivery work each truck completed. <strong>How to read:</strong> Taller bars indicate more active vehicles. A noticeably short bar compared to the fleet average suggests the vehicle was underutilized, off-road for maintenance, or operating on short local routes. Use KM/Hr in the Rankings table to distinguish efficient long-haul trucks from those making many short trips.</p>
     </div>
     <div class="card">
       <div class="card-title">Total GPS Hours per Vehicle</div>
       <div class="ch"><canvas id="ch-hrs"></canvas></div>
-      <p class="card-note"><strong>Purpose:</strong> Shows how many hours each vehicle was tracked as moving over the period. Combined with KM, this reveals route efficiency. <strong>How to read:</strong> A vehicle with high hours but low KM is travelling slowly — typically due to heavy traffic, many short stops, or dense urban routes. For long-haul delivery trucks a healthy effective speed is 25–40 km/h; divide any vehicle's total KM by its GPS hours to see where it sits.</p>
     </div>
   </div>
   <div class="card">
     <div class="card-title">Fleet Rankings</div>
     <div style="overflow-x:auto"><table class="tbl" id="tbl-rank"></table></div>
-    <p class="card-note"><strong>Purpose:</strong> A single table comparing all vehicles across key performance indicators — ideal for management reviews and identifying outliers. <strong>How to read:</strong> Sorted by total KM (highest first). <strong>Utilisation</strong> = % of working days the vehicle was GPS-active (green ≥70%, amber ≥40%, red &lt;40%). <strong>RTB %</strong> = return-to-base rate — % of trip-days the truck ended back at the depot (green ≥80%, amber ≥50%, red &lt;50%). <strong>KM/Hr</strong> = effective road speed; values below 20 km/h may indicate excessive idling or stop-heavy urban routes. Gold, silver, and bronze badges mark the top 3 performers by distance.</p>
   </div>
 </div>
 
@@ -311,13 +281,16 @@ body{font-family:var(--font-body);background:var(--color-surface-page);color:var
 <div id="pane-crew" class="tab-pane">
   <div class="card">
     <div class="card-title">GPS Truck Hours vs Crew Clocking Hours</div>
+    <p class="card-note">
+      GPS hours = time the truck was tracked on route (aligned window only).
+      Crew clocking hours = biometric clock-in/out from the HAVEN system, counted <strong>only on days the truck was GPS-active</strong>.
+      The depot gap = crew labor on trip days that was not spent driving (loading, waiting, unloading).
+    </p>
     <div class="ch-xl"><canvas id="ch-crew-compare"></canvas></div>
-    <p class="card-note"><strong>Purpose:</strong> Cross-references GPS vehicle data against biometric clocking data from the HAVEN system to surface mismatches between truck movement and crew time. This is a labour-accountability check. <strong>How to read:</strong> Each vehicle shows four bars side-by-side: navy = GPS truck hours on road; yellow = driver clocking hours; teal = assistant 1 hours; terra = assistant 2 hours. All clocking hours are filtered to <strong>days the truck was GPS-active only</strong>, so depot-only days are excluded. A crew bar that is much taller than the GPS bar means crew clocked significant time before/after driving (loading, admin, unloading) — some gap is normal and expected. A very large gap (&gt;30% above GPS hours) warrants a review. GPS bars that are significantly taller than all crew bars may indicate the truck was driven without its regular crew.</p>
   </div>
   <div class="card">
     <div class="card-title">Crew Blocking Summary</div>
     <div style="overflow-x:auto"><table class="tbl" id="tbl-crew-summary"></table></div>
-    <p class="card-note"><strong>Purpose:</strong> Compact table for at-a-glance comparison of GPS truck time versus individual crew clocking, per vehicle. Use this for payroll cross-checks or to flag anomalies before investigating individual truck cards below. <strong>How to read:</strong> <strong>GPS Hrs</strong> = hours the truck was on road (trip days only). <strong>Driver / Asst Hrs</strong> = biometric clocking hours for each assigned crew member, on the same trip days. <strong>Depot Gap</strong> = total crew hours minus GPS hours. A positive gap (red badge) is normal — it covers loading, waiting, and unloading time at customers. A large positive gap (&gt;50 hrs) may indicate crew clocking in well before or after truck departure. A negative gap (green badge) means crew clocked fewer hours than the truck moved — possible when a truck was run without its regular crew, or crew data is missing.</p>
   </div>
   <div id="crew-cards"></div>
 </div>
@@ -334,7 +307,6 @@ body{font-family:var(--font-body);background:var(--color-surface-page);color:var
       <div class="leg-i"><div class="leg-d" style="background:#F5C400"></div>&gt;300 km</div>
     </div>
     <div class="hm-wrap"><table class="hm" id="tbl-hm"></table></div>
-    <p class="card-note"><strong>Purpose:</strong> Gives a bird's-eye view of the entire fleet's activity over time — ideal for spotting patterns, gaps, and high-output days at a glance without reading numbers. <strong>How to read:</strong> Each row = one vehicle; each column = one working day. Cell colour shows how far the vehicle travelled that day: <strong>dark grey = no movement</strong>, dark navy ≤100 km, mid navy 101–200 km, bright blue 201–300 km, <strong>yellow &gt;300 km</strong> (high-intensity). Read across a row to see whether a vehicle works consistently or has large gaps. Read down a column to see how many trucks were active on a specific date — a mostly-grey column may indicate a public holiday or a fleet-wide incident.</p>
   </div>
 </div>
 
@@ -343,12 +315,10 @@ body{font-family:var(--font-body);background:var(--color-surface-page);color:var
   <div class="card">
     <div class="card-title">Monthly KM per Vehicle</div>
     <div class="ch-lg"><canvas id="ch-monthly"></canvas></div>
-    <p class="card-note"><strong>Purpose:</strong> Tracks each vehicle's output month by month to reveal trends — growth, seasonal patterns, or a drop-off that needs investigation. <strong>How to read:</strong> Each colour represents one vehicle (see legend). A vehicle with a lower bar in a later month is not necessarily performing worse — check the Monthly Breakdown table below for active days. Fewer working days in a month will naturally produce lower KM totals. To compare months fairly, divide each vehicle's KM by its active days in that month.</p>
   </div>
   <div class="card">
     <div class="card-title">Monthly Breakdown</div>
     <div style="overflow-x:auto"><table class="tbl" id="tbl-monthly"></table></div>
-    <p class="card-note"><strong>Purpose:</strong> The detailed complement to the chart above — provides raw numbers for KM, GPS hours, and active days per vehicle per month, enabling proper month-on-month normalization. <strong>How to read:</strong> Always check the <strong>Days</strong> column first. If a vehicle had 22 active days in March but only 8 in April, its April KM will naturally be much lower — that is not a performance issue. To compare efficiency across months, calculate <em>KM ÷ Days</em> for each row. The <strong>Total KM</strong> column (right) is the full-period sum and matches the Overview charts.</p>
   </div>
 </div>
 
@@ -358,12 +328,10 @@ body{font-family:var(--font-body);background:var(--color-surface-page);color:var
     <div class="card">
       <div class="card-title">Top Destinations (day end-points)</div>
       <table class="tbl" id="tbl-dest"></table>
-      <p class="card-note"><strong>Purpose:</strong> Shows where each truck's GPS route ended at close of day. Identifies the most common delivery endpoints and flags vehicles that did not return to base. <strong>How to read:</strong> The Olympic Paints Factory (Anchorville) should dominate — it confirms that vehicles returned to the depot. Rows highlighted in green are factory returns. Non-factory destinations represent overnight stops, cross-border deliveries, or routes that finished at a customer site. A high count of non-factory destinations for a specific vehicle is worth investigating.</p>
     </div>
     <div class="card">
       <div class="card-title">Top Origins (day start-points)</div>
       <table class="tbl" id="tbl-orig"></table>
-      <p class="card-note"><strong>Purpose:</strong> Shows where each tracked route began. Confirms that vehicles are dispatching from the factory and identifies trucks that started their day away from the depot. <strong>How to read:</strong> Green-highlighted rows are factory dispatches (normal). Non-factory origins mean the vehicle was parked overnight at a remote location from the previous day's run. Cross-referencing origins against destinations on a date-by-date basis lets you reconstruct multi-day routes and confirm driver reconciliation.</p>
     </div>
   </div>
 </div>
@@ -371,7 +339,7 @@ body{font-family:var(--font-body);background:var(--color-surface-page);color:var
 <div class="footer" id="footer"></div>
 
 <script>
-const D = {"period": "02/03/2026 - 21/04/2026", "period_days": 51, "generated": "05 May 2026 12:37", "excel": "VehicleInOut_Mar2026_Apr2026.xlsx", "fleet": {"total_km": 79414.8, "total_hrs": 2489.5, "avg_util": 63.9, "avg_rtb": 88.8, "n_vehicles": 7}, "stats": [{"vehicle": "MJ35FPGP", "days_active": 34, "total_km": 17289.8, "avg_km_day": 508.5, "max_km_day": 1291.3, "total_hrs": 484.4, "avg_hrs_day": 14.2, "kmph": 35.7, "utilisation": 66.7, "rtb_n": 31, "rtb_pct": 91.2}, {"vehicle": "KW40KZGP", "days_active": 36, "total_km": 17059.0, "avg_km_day": 473.9, "max_km_day": 1270.0, "total_hrs": 503.2, "avg_hrs_day": 14.0, "kmph": 33.9, "utilisation": 70.6, "rtb_n": 35, "rtb_pct": 97.2}, {"vehicle": "LJ92TGGP", "days_active": 34, "total_km": 12646.0, "avg_km_day": 371.9, "max_km_day": 1240.0, "total_hrs": 338.3, "avg_hrs_day": 10.0, "kmph": 37.4, "utilisation": 66.7, "rtb_n": 25, "rtb_pct": 73.5}, {"vehicle": "KW57WWGP", "days_active": 30, "total_km": 12451.0, "avg_km_day": 415.0, "max_km_day": 1003.0, "total_hrs": 387.8, "avg_hrs_day": 12.9, "kmph": 32.1, "utilisation": 58.8, "rtb_n": 27, "rtb_pct": 90.0}, {"vehicle": "LJ92TDGP", "days_active": 30, "total_km": 11705.0, "avg_km_day": 390.2, "max_km_day": 1103.0, "total_hrs": 345.4, "avg_hrs_day": 11.5, "kmph": 33.9, "utilisation": 58.8, "rtb_n": 21, "rtb_pct": 70.0}, {"vehicle": "DH33HLGP", "days_active": 34, "total_km": 5523.0, "avg_km_day": 162.4, "max_km_day": 821.0, "total_hrs": 242.6, "avg_hrs_day": 7.1, "kmph": 22.8, "utilisation": 66.7, "rtb_n": 34, "rtb_pct": 100.0}, {"vehicle": "CR61GCGP", "days_active": 30, "total_km": 2741.0, "avg_km_day": 91.4, "max_km_day": 362.0, "total_hrs": 187.8, "avg_hrs_day": 6.3, "kmph": 14.6, "utilisation": 58.8, "rtb_n": 30, "rtb_pct": 100.0}], "vehicles": ["CR61GCGP", "DH33HLGP", "KW40KZGP", "KW57WWGP", "LJ92TDGP", "LJ92TGGP", "MJ35FPGP"], "activity": {"dates": ["02/03", "03/03", "04/03", "05/03", "06/03", "09/03", "10/03", "11/03", "12/03", "13/03", "16/03", "17/03", "18/03", "19/03", "20/03", "23/03", "24/03", "25/03", "26/03", "27/03", "30/03", "31/03", "01/04", "02/04", "03/04", "07/04", "08/04", "09/04", "10/04", "11/04", "13/04", "14/04", "15/04", "16/04", "17/04", "18/04", "19/04", "20/04", "21/04"], "matrix": {"CR61GCGP": [0.0, 10.0, 29.0, 23.0, 131.0, 67.0, 160.0, 23.0, 125.0, 82.0, 130.0, 362.0, 147.0, 150.0, 136.0, 156.0, 64.0, 193.0, 90.0, 117.0, 128.0, 143.0, 13.0, 0.0, 0.0, 20.0, 0.0, 17.0, 33.0, 0.0, 30.0, 90.0, 10.0, 0.0, 62.0, 0.0, 0.0, 0.0, 0.0], "DH33HLGP": [12.0, 1.0, 170.0, 0.0, 0.0, 3.0, 2.0, 728.0, 534.0, 407.0, 105.0, 821.0, 0.0, 77.0, 97.0, 6.0, 628.0, 295.0, 78.0, 115.0, 0.0, 84.0, 353.0, 0.0, 0.0, 0.0, 11.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 386.0, 150.0, 0.0, 0.0, 0.0, 458.0], "KW40KZGP": [6.0, 1270.0, 1.0, 258.0, 753.0, 803.0, 774.0, 346.0, 622.0, 405.0, 1.0, 273.0, 752.0, 50.0, 0.0, 128.0, 689.0, 135.0, 164.0, 943.0, 128.0, 5.0, 1018.0, 141.0, 0.0, 995.0, 757.0, 328.0, 252.0, 0.0, 137.0, 810.0, 1080.0, 925.0, 1030.0, 0.0, 0.0, 721.0, 359.0], "KW57WWGP": [0.0, 209.0, 840.0, 755.0, 528.0, 692.0, 224.0, 587.0, 68.0, 108.0, 650.0, 0.0, 109.0, 727.0, 693.0, 56.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 955.0, 736.0, 0.0, 198.0, 674.0, 127.0, 198.0, 0.0, 1003.0, 648.0, 555.0, 705.0, 3.0, 0.0, 0.0, 403.0, 0.0], "LJ92TDGP": [122.0, 235.0, 268.0, 760.0, 0.0, 0.0, 0.0, 83.0, 0.0, 28.0, 0.0, 35.0, 0.0, 73.0, 1.0, 753.0, 600.0, 893.0, 107.0, 291.0, 0.0, 0.0, 0.0, 754.0, 0.0, 573.0, 1072.0, 969.0, 357.0, 135.0, 126.0, 0.0, 727.0, 300.0, 1103.0, 0.0, 0.0, 842.0, 498.0], "LJ92TGGP": [171.0, 1112.0, 329.0, 342.0, 264.0, 1234.0, 183.0, 0.0, 0.0, 212.0, 234.0, 413.0, 151.0, 0.0, 0.0, 1.0, 0.0, 0.0, 112.0, 932.0, 0.0, 18.0, 115.0, 1079.0, 7.0, 1240.0, 68.0, 153.0, 765.0, 0.0, 268.0, 640.0, 424.0, 334.0, 632.0, 6.0, 0.0, 1101.0, 106.0], "MJ35FPGP": [293.7, 1063.5, 237.2, 388.0, 1098.4, 547.2, 755.4, 1174.2, 1.7, 1123.5, 133.7, 645.9, 544.9, 552.1, 559.1, 6.8, 1134.4, 50.1, 412.2, 0.0, 0.3, 0.2, 1134.6, 1291.3, 0.0, 712.7, 102.6, 689.8, 251.4, 0.0, 641.0, 313.2, 560.7, 1.2, 77.0, 0.0, 0.0, 150.9, 640.9]}}, "monthly": {"months": ["Mar 2026", "Apr 2026"], "data": {"CR61GCGP": {"Mar 2026": {"km": 2466.0, "hrs": 160.5, "days": 22}, "Apr 2026": {"km": 275.0, "hrs": 27.3, "days": 8}}, "DH33HLGP": {"Mar 2026": {"km": 4163.0, "hrs": 168.8, "days": 21}, "Apr 2026": {"km": 1360.0, "hrs": 73.9, "days": 13}}, "KW40KZGP": {"Mar 2026": {"km": 8506.0, "hrs": 284.1, "days": 22}, "Apr 2026": {"km": 8553.0, "hrs": 219.1, "days": 14}}, "KW57WWGP": {"Mar 2026": {"km": 6246.0, "hrs": 229.9, "days": 18}, "Apr 2026": {"km": 6205.0, "hrs": 157.9, "days": 12}}, "LJ92TDGP": {"Mar 2026": {"km": 4249.0, "hrs": 153.9, "days": 17}, "Apr 2026": {"km": 7456.0, "hrs": 191.5, "days": 13}}, "LJ92TGGP": {"Mar 2026": {"km": 5708.0, "hrs": 152.5, "days": 19}, "Apr 2026": {"km": 6938.0, "hrs": 185.8, "days": 15}}, "MJ35FPGP": {"Mar 2026": {"km": 10722.5, "hrs": 299.7, "days": 21}, "Apr 2026": {"km": 6567.3, "hrs": 184.7, "days": 13}}}}, "routes": {"destinations": [{"name": "Olympic Paints Factory, Anchorville", "count": 209, "pct": 91.7}, {"name": "Flamingo Street Lenasia Suburbs, Lenasia", "count": 2, "pct": 0.9}, {"name": "Mogoditshane Outlying, Mogoditshane Outlying (Kweneng)", "count": 2, "pct": 0.9}, {"name": "Industry Road Isando, Isando", "count": 2, "pct": 0.9}, {"name": "Korokoro Street Waterval East, Rustenburg Outlying (North West)", "count": 1, "pct": 0.4}, {"name": "B202 Kanye, Southern (Southern)", "count": 1, "pct": 0.4}, {"name": "South-East, South-east (South-East)", "count": 1, "pct": 0.4}, {"name": "Near 27 Mecca Road, Anchorville", "count": 1, "pct": 0.4}, {"name": "Near 224A Medical Road, Randjespark Ext 136", "count": 1, "pct": 0.4}, {"name": "Lejara Road Broadhurst Industrial, Broadhurst Industrial (South-East)", "count": 1, "pct": 0.4}, {"name": "Near 224A Medical Road, Erand Ah Ext 1", "count": 1, "pct": 0.4}, {"name": "Near 246 Protea Avenue, Lenasia Ext 7", "count": 1, "pct": 0.4}, {"name": "Taung, South-east (South-East)", "count": 1, "pct": 0.4}, {"name": "Polokwane Local Municipality, Limpopo (Limpopo)", "count": 1, "pct": 0.4}, {"name": "Botha Street W Modjadiskloof, Limpopo (Limpopo)", "count": 1, "pct": 0.4}, {"name": "Wolhuterskop Trading, Primindia (North West)", "count": 1, "pct": 0.4}, {"name": "Keyter Street Rosendal, Rosendal (Free State)", "count": 1, "pct": 0.4}], "origins": [{"name": "Olympic Paints Factory, Anchorville", "count": 212, "pct": 93.0}, {"name": "Flamingo Street Lenasia Suburbs, Lenasia", "count": 2, "pct": 0.9}, {"name": "Mogoditshane Outlying, Mogoditshane Outlying (Kweneng)", "count": 2, "pct": 0.9}, {"name": "Industry Road Isando, Isando", "count": 2, "pct": 0.9}, {"name": "South-East, South-east (South-East)", "count": 1, "pct": 0.4}, {"name": "Korokoro Street Waterval East, Rustenburg Outlying (North West)", "count": 1, "pct": 0.4}, {"name": "Kanye, Southern (Southern)", "count": 1, "pct": 0.4}, {"name": "Near 27 Mecca Road, Anchorville", "count": 1, "pct": 0.4}, {"name": "Near 224A Medical Road, Randjespark Ext 136", "count": 1, "pct": 0.4}, {"name": "Lejara Road Broadhurst Industrial, Broadhurst Industrial (South-East)", "count": 1, "pct": 0.4}, {"name": "Near 224A Medical Road, Erand Ah Ext 1", "count": 1, "pct": 0.4}, {"name": "Near 246 Protea Avenue, Lenasia Ext 7", "count": 1, "pct": 0.4}, {"name": "Taung, South-east (South-East)", "count": 1, "pct": 0.4}, {"name": "Myka Trade 2 Mankweng, Limpopo (Limpopo)", "count": 1, "pct": 0.4}]}, "crew": {"LJ92TDGP": {"truck_hrs": 215.5, "truck_km": 7854.0, "active_days": 17, "aligned_from": "26/03/2026", "aligned_to": "21/04/2026", "driver": {"name": "Clement Mvuyisi Tetyana", "hrs": 35.5, "days": 2, "matched": true, "role": "Driver"}, "assistants": [{"name": "Philly Mapembe", "hrs": 83.7, "days": 10, "matched": true, "role": "Assistant"}, {"name": "Lehlohonolo Zwakala", "hrs": 45.2, "days": 7, "matched": true, "role": "Assistant"}], "total_crew_hrs": 164.4, "gap_hrs": -51.1}, "LJ92TGGP": {"truck_hrs": 222.7, "truck_km": 8000.0, "active_days": 19, "aligned_from": "26/03/2026", "aligned_to": "21/04/2026", "driver": {"name": "Andrew Nkosi Nelani", "hrs": 63.1, "days": 11, "matched": true, "role": "Driver"}, "assistants": [{"name": "Nhlamulo Jeff Mabunda", "hrs": 78.0, "days": 11, "matched": true, "role": "Assistant"}, {"name": "Nhlanhla Moli", "hrs": 67.5, "days": 11, "matched": true, "role": "Assistant"}], "total_crew_hrs": 208.6, "gap_hrs": -14.1}, "KW40KZGP": {"truck_hrs": 259.0, "truck_km": 9793.0, "active_days": 18, "aligned_from": "26/03/2026", "aligned_to": "21/04/2026", "driver": {"name": "Happy Simango", "hrs": 59.2, "days": 11, "matched": true, "role": "Driver"}, "assistants": [{"name": "Godfrey Mofokeng", "hrs": 118.1, "days": 12, "matched": true, "role": "Assistant"}, {"name": "Petrus Masinge", "hrs": 74.2, "days": 11, "matched": true, "role": "Assistant"}], "total_crew_hrs": 251.5, "gap_hrs": -7.5}, "KW57WWGP": {"truck_hrs": 172.9, "truck_km": 6205.0, "active_days": 14, "aligned_from": "26/03/2026", "aligned_to": "21/04/2026", "driver": {"name": "David Madakane", "hrs": 125.8, "days": 10, "matched": true, "role": "Driver"}, "assistants": [{"name": "Nephilian Matsididi", "hrs": 92.6, "days": 10, "matched": true, "role": "Assistant"}, {"name": "Nhlanhla Zikode", "hrs": 92.2, "days": 11, "matched": true, "role": "Assistant"}], "total_crew_hrs": 310.6, "gap_hrs": 137.7}, "MJ35FPGP": {"truck_hrs": 213.0, "truck_km": 6980.0, "active_days": 16, "aligned_from": "26/03/2026", "aligned_to": "21/04/2026", "driver": {"name": "Shaun Fazile", "hrs": 0.0, "days": 0, "matched": false, "role": "Driver"}, "assistants": [{"name": "Timothy Sinyolo", "hrs": 77.7, "days": 12, "matched": true, "role": "Assistant"}, {"name": "Loyiso Dlali", "hrs": 161.8, "days": 14, "matched": true, "role": "Assistant"}], "total_crew_hrs": 239.5, "gap_hrs": 26.5}, "DH33HLGP": {"truck_hrs": 98.7, "truck_km": 1637.0, "active_days": 17, "aligned_from": "26/03/2026", "aligned_to": "21/04/2026", "driver": null, "assistants": [], "total_crew_hrs": 0.0, "gap_hrs": -98.7}, "CR61GCGP": {"truck_hrs": 55.5, "truck_km": 753.0, "active_days": 12, "aligned_from": "26/03/2026", "aligned_to": "21/04/2026", "driver": null, "assistants": [], "total_crew_hrs": 0.0, "gap_hrs": -55.5}}};
+const D = {"period": "02/03/2026 - 21/04/2026", "period_days": 51, "generated": "10 May 2026 22:33", "excel": "VehicleInOut_Mar2026_Apr2026.xlsx", "fleet": {"total_km": 79414.8, "total_hrs": 2489.5, "avg_util": 63.9, "avg_rtb": 0.0, "n_vehicles": 7, "total_crew_hrs": 1174.6, "total_trip_days": 113, "gap_hrs": -62.7, "people": [{"name": "Clement Mvuyisi Tetyana", "role": "Driver", "hrs": 35.5, "days": 2, "matched": true}, {"name": "Philly Mapembe", "role": "Assistant", "hrs": 83.7, "days": 10, "matched": true}, {"name": "Lehlohonolo Zwakala", "role": "Assistant", "hrs": 45.2, "days": 7, "matched": true}, {"name": "Andrew Nkosi Nelani", "role": "Driver", "hrs": 63.1, "days": 11, "matched": true}, {"name": "Nhlamulo Jeff Mabunda", "role": "Assistant", "hrs": 78.0, "days": 11, "matched": true}, {"name": "Nhlanhla Moli", "role": "Assistant", "hrs": 67.5, "days": 11, "matched": true}, {"name": "Happy Simango", "role": "Driver", "hrs": 59.2, "days": 11, "matched": true}, {"name": "Godfrey Mofokeng", "role": "Assistant", "hrs": 118.1, "days": 12, "matched": true}, {"name": "Petrus Masinge", "role": "Assistant", "hrs": 74.2, "days": 11, "matched": true}, {"name": "David Madakane", "role": "Driver", "hrs": 125.8, "days": 10, "matched": true}, {"name": "Nephilian Matsididi", "role": "Assistant", "hrs": 92.6, "days": 10, "matched": true}, {"name": "Nhlanhla Zikode", "role": "Assistant", "hrs": 92.2, "days": 11, "matched": true}, {"name": "Shaun Fazile", "role": "Driver", "hrs": 0.0, "days": 0, "matched": false}, {"name": "Timothy Sinyolo", "role": "Assistant", "hrs": 77.7, "days": 12, "matched": true}, {"name": "Loyiso Dlali", "role": "Assistant", "hrs": 161.8, "days": 14, "matched": true}]}, "stats": [{"vehicle": "MJ35FPGP", "days_active": 34, "total_km": 17289.8, "avg_km_day": 508.5, "max_km_day": 1291.3, "total_hrs": 484.4, "avg_hrs_day": 14.2, "kmph": 35.7, "utilisation": 66.7, "rtb_n": 0, "rtb_pct": 0.0}, {"vehicle": "KW40KZGP", "days_active": 36, "total_km": 17059.0, "avg_km_day": 473.9, "max_km_day": 1270.0, "total_hrs": 503.2, "avg_hrs_day": 14.0, "kmph": 33.9, "utilisation": 70.6, "rtb_n": 0, "rtb_pct": 0.0}, {"vehicle": "LJ92TGGP", "days_active": 34, "total_km": 12646.0, "avg_km_day": 371.9, "max_km_day": 1240.0, "total_hrs": 338.3, "avg_hrs_day": 10.0, "kmph": 37.4, "utilisation": 66.7, "rtb_n": 0, "rtb_pct": 0.0}, {"vehicle": "KW57WWGP", "days_active": 30, "total_km": 12451.0, "avg_km_day": 415.0, "max_km_day": 1003.0, "total_hrs": 387.8, "avg_hrs_day": 12.9, "kmph": 32.1, "utilisation": 58.8, "rtb_n": 0, "rtb_pct": 0.0}, {"vehicle": "LJ92TDGP", "days_active": 30, "total_km": 11705.0, "avg_km_day": 390.2, "max_km_day": 1103.0, "total_hrs": 345.4, "avg_hrs_day": 11.5, "kmph": 33.9, "utilisation": 58.8, "rtb_n": 0, "rtb_pct": 0.0}, {"vehicle": "DH33HLGP", "days_active": 34, "total_km": 5523.0, "avg_km_day": 162.4, "max_km_day": 821.0, "total_hrs": 242.6, "avg_hrs_day": 7.1, "kmph": 22.8, "utilisation": 66.7, "rtb_n": 0, "rtb_pct": 0.0}, {"vehicle": "CR61GCGP", "days_active": 30, "total_km": 2741.0, "avg_km_day": 91.4, "max_km_day": 362.0, "total_hrs": 187.8, "avg_hrs_day": 6.3, "kmph": 14.6, "utilisation": 58.8, "rtb_n": 0, "rtb_pct": 0.0}], "vehicles": ["CR61GCGP", "DH33HLGP", "KW40KZGP", "KW57WWGP", "LJ92TDGP", "LJ92TGGP", "MJ35FPGP"], "activity": {"dates": ["02/03", "03/03", "04/03", "05/03", "06/03", "09/03", "10/03", "11/03", "12/03", "13/03", "16/03", "17/03", "18/03", "19/03", "20/03", "23/03", "24/03", "25/03", "26/03", "27/03", "30/03", "31/03", "01/04", "02/04", "03/04", "07/04", "08/04", "09/04", "10/04", "11/04", "13/04", "14/04", "15/04", "16/04", "17/04", "18/04", "19/04", "20/04", "21/04"], "matrix": {"CR61GCGP": [0.0, 10.0, 29.0, 23.0, 131.0, 67.0, 160.0, 23.0, 125.0, 82.0, 130.0, 362.0, 147.0, 150.0, 136.0, 156.0, 64.0, 193.0, 90.0, 117.0, 128.0, 143.0, 13.0, 0.0, 0.0, 20.0, 0.0, 17.0, 33.0, 0.0, 30.0, 90.0, 10.0, 0.0, 62.0, 0.0, 0.0, 0.0, 0.0], "DH33HLGP": [12.0, 1.0, 170.0, 0.0, 0.0, 3.0, 2.0, 728.0, 534.0, 407.0, 105.0, 821.0, 0.0, 77.0, 97.0, 6.0, 628.0, 295.0, 78.0, 115.0, 0.0, 84.0, 353.0, 0.0, 0.0, 0.0, 11.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 386.0, 150.0, 0.0, 0.0, 0.0, 458.0], "KW40KZGP": [6.0, 1270.0, 1.0, 258.0, 753.0, 803.0, 774.0, 346.0, 622.0, 405.0, 1.0, 273.0, 752.0, 50.0, 0.0, 128.0, 689.0, 135.0, 164.0, 943.0, 128.0, 5.0, 1018.0, 141.0, 0.0, 995.0, 757.0, 328.0, 252.0, 0.0, 137.0, 810.0, 1080.0, 925.0, 1030.0, 0.0, 0.0, 721.0, 359.0], "KW57WWGP": [0.0, 209.0, 840.0, 755.0, 528.0, 692.0, 224.0, 587.0, 68.0, 108.0, 650.0, 0.0, 109.0, 727.0, 693.0, 56.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 955.0, 736.0, 0.0, 198.0, 674.0, 127.0, 198.0, 0.0, 1003.0, 648.0, 555.0, 705.0, 3.0, 0.0, 0.0, 403.0, 0.0], "LJ92TDGP": [122.0, 235.0, 268.0, 760.0, 0.0, 0.0, 0.0, 83.0, 0.0, 28.0, 0.0, 35.0, 0.0, 73.0, 1.0, 753.0, 600.0, 893.0, 107.0, 291.0, 0.0, 0.0, 0.0, 754.0, 0.0, 573.0, 1072.0, 969.0, 357.0, 135.0, 126.0, 0.0, 727.0, 300.0, 1103.0, 0.0, 0.0, 842.0, 498.0], "LJ92TGGP": [171.0, 1112.0, 329.0, 342.0, 264.0, 1234.0, 183.0, 0.0, 0.0, 212.0, 234.0, 413.0, 151.0, 0.0, 0.0, 1.0, 0.0, 0.0, 112.0, 932.0, 0.0, 18.0, 115.0, 1079.0, 7.0, 1240.0, 68.0, 153.0, 765.0, 0.0, 268.0, 640.0, 424.0, 334.0, 632.0, 6.0, 0.0, 1101.0, 106.0], "MJ35FPGP": [293.7, 1063.5, 237.2, 388.0, 1098.4, 547.2, 755.4, 1174.2, 1.7, 1123.5, 133.7, 645.9, 544.9, 552.1, 559.1, 6.8, 1134.4, 50.1, 412.2, 0.0, 0.3, 0.2, 1134.6, 1291.3, 0.0, 712.7, 102.6, 689.8, 251.4, 0.0, 641.0, 313.2, 560.7, 1.2, 77.0, 0.0, 0.0, 150.9, 640.9]}}, "monthly": {"months": ["Mar 2026", "Apr 2026"], "data": {"CR61GCGP": {"Mar 2026": {"km": 2466.0, "hrs": 160.5, "days": 22}, "Apr 2026": {"km": 275.0, "hrs": 27.3, "days": 8}}, "DH33HLGP": {"Mar 2026": {"km": 4163.0, "hrs": 168.8, "days": 21}, "Apr 2026": {"km": 1360.0, "hrs": 73.9, "days": 13}}, "KW40KZGP": {"Mar 2026": {"km": 8506.0, "hrs": 284.1, "days": 22}, "Apr 2026": {"km": 8553.0, "hrs": 219.1, "days": 14}}, "KW57WWGP": {"Mar 2026": {"km": 6246.0, "hrs": 229.9, "days": 18}, "Apr 2026": {"km": 6205.0, "hrs": 157.9, "days": 12}}, "LJ92TDGP": {"Mar 2026": {"km": 4249.0, "hrs": 153.9, "days": 17}, "Apr 2026": {"km": 7456.0, "hrs": 191.5, "days": 13}}, "LJ92TGGP": {"Mar 2026": {"km": 5708.0, "hrs": 152.5, "days": 19}, "Apr 2026": {"km": 6938.0, "hrs": 185.8, "days": 15}}, "MJ35FPGP": {"Mar 2026": {"km": 10722.5, "hrs": 299.7, "days": 21}, "Apr 2026": {"km": 6567.3, "hrs": 184.7, "days": 13}}}}, "routes": {"destinations": [{"name": "Olympic Paints Factory, Anchorville", "count": 209, "pct": 91.7}, {"name": "Flamingo Street Lenasia Suburbs, Lenasia", "count": 2, "pct": 0.9}, {"name": "Mogoditshane Outlying, Mogoditshane Outlying (Kweneng)", "count": 2, "pct": 0.9}, {"name": "Industry Road Isando, Isando", "count": 2, "pct": 0.9}, {"name": "Korokoro Street Waterval East, Rustenburg Outlying (North West)", "count": 1, "pct": 0.4}, {"name": "B202 Kanye, Southern (Southern)", "count": 1, "pct": 0.4}, {"name": "South-East, South-east (South-East)", "count": 1, "pct": 0.4}, {"name": "Near 27 Mecca Road, Anchorville", "count": 1, "pct": 0.4}, {"name": "Near 224A Medical Road, Randjespark Ext 136", "count": 1, "pct": 0.4}, {"name": "Lejara Road Broadhurst Industrial, Broadhurst Industrial (South-East)", "count": 1, "pct": 0.4}, {"name": "Near 224A Medical Road, Erand Ah Ext 1", "count": 1, "pct": 0.4}, {"name": "Near 246 Protea Avenue, Lenasia Ext 7", "count": 1, "pct": 0.4}, {"name": "Taung, South-east (South-East)", "count": 1, "pct": 0.4}, {"name": "Polokwane Local Municipality, Limpopo (Limpopo)", "count": 1, "pct": 0.4}, {"name": "Botha Street W Modjadiskloof, Limpopo (Limpopo)", "count": 1, "pct": 0.4}, {"name": "Wolhuterskop Trading, Primindia (North West)", "count": 1, "pct": 0.4}, {"name": "Keyter Street Rosendal, Rosendal (Free State)", "count": 1, "pct": 0.4}], "origins": [{"name": "Olympic Paints Factory, Anchorville", "count": 212, "pct": 93.0}, {"name": "Flamingo Street Lenasia Suburbs, Lenasia", "count": 2, "pct": 0.9}, {"name": "Mogoditshane Outlying, Mogoditshane Outlying (Kweneng)", "count": 2, "pct": 0.9}, {"name": "Industry Road Isando, Isando", "count": 2, "pct": 0.9}, {"name": "South-East, South-east (South-East)", "count": 1, "pct": 0.4}, {"name": "Korokoro Street Waterval East, Rustenburg Outlying (North West)", "count": 1, "pct": 0.4}, {"name": "Kanye, Southern (Southern)", "count": 1, "pct": 0.4}, {"name": "Near 27 Mecca Road, Anchorville", "count": 1, "pct": 0.4}, {"name": "Near 224A Medical Road, Randjespark Ext 136", "count": 1, "pct": 0.4}, {"name": "Lejara Road Broadhurst Industrial, Broadhurst Industrial (South-East)", "count": 1, "pct": 0.4}, {"name": "Near 224A Medical Road, Erand Ah Ext 1", "count": 1, "pct": 0.4}, {"name": "Near 246 Protea Avenue, Lenasia Ext 7", "count": 1, "pct": 0.4}, {"name": "Taung, South-east (South-East)", "count": 1, "pct": 0.4}, {"name": "Myka Trade 2 Mankweng, Limpopo (Limpopo)", "count": 1, "pct": 0.4}]}, "crew": {"LJ92TDGP": {"truck_hrs": 215.5, "truck_km": 7854.0, "active_days": 17, "aligned_from": "26/03/2026", "aligned_to": "21/04/2026", "driver": {"name": "Clement Mvuyisi Tetyana", "hrs": 35.5, "days": 2, "matched": true, "role": "Driver"}, "assistants": [{"name": "Philly Mapembe", "hrs": 83.7, "days": 10, "matched": true, "role": "Assistant"}, {"name": "Lehlohonolo Zwakala", "hrs": 45.2, "days": 7, "matched": true, "role": "Assistant"}], "total_crew_hrs": 164.4, "gap_hrs": -51.1}, "LJ92TGGP": {"truck_hrs": 222.7, "truck_km": 8000.0, "active_days": 19, "aligned_from": "26/03/2026", "aligned_to": "21/04/2026", "driver": {"name": "Andrew Nkosi Nelani", "hrs": 63.1, "days": 11, "matched": true, "role": "Driver"}, "assistants": [{"name": "Nhlamulo Jeff Mabunda", "hrs": 78.0, "days": 11, "matched": true, "role": "Assistant"}, {"name": "Nhlanhla Moli", "hrs": 67.5, "days": 11, "matched": true, "role": "Assistant"}], "total_crew_hrs": 208.6, "gap_hrs": -14.1}, "KW40KZGP": {"truck_hrs": 259.0, "truck_km": 9793.0, "active_days": 18, "aligned_from": "26/03/2026", "aligned_to": "21/04/2026", "driver": {"name": "Happy Simango", "hrs": 59.2, "days": 11, "matched": true, "role": "Driver"}, "assistants": [{"name": "Godfrey Mofokeng", "hrs": 118.1, "days": 12, "matched": true, "role": "Assistant"}, {"name": "Petrus Masinge", "hrs": 74.2, "days": 11, "matched": true, "role": "Assistant"}], "total_crew_hrs": 251.5, "gap_hrs": -7.5}, "KW57WWGP": {"truck_hrs": 172.9, "truck_km": 6205.0, "active_days": 14, "aligned_from": "26/03/2026", "aligned_to": "21/04/2026", "driver": {"name": "David Madakane", "hrs": 125.8, "days": 10, "matched": true, "role": "Driver"}, "assistants": [{"name": "Nephilian Matsididi", "hrs": 92.6, "days": 10, "matched": true, "role": "Assistant"}, {"name": "Nhlanhla Zikode", "hrs": 92.2, "days": 11, "matched": true, "role": "Assistant"}], "total_crew_hrs": 310.6, "gap_hrs": 137.7}, "MJ35FPGP": {"truck_hrs": 213.0, "truck_km": 6980.0, "active_days": 16, "aligned_from": "26/03/2026", "aligned_to": "21/04/2026", "driver": {"name": "Shaun Fazile", "hrs": 0.0, "days": 0, "matched": false, "role": "Driver"}, "assistants": [{"name": "Timothy Sinyolo", "hrs": 77.7, "days": 12, "matched": true, "role": "Assistant"}, {"name": "Loyiso Dlali", "hrs": 161.8, "days": 14, "matched": true, "role": "Assistant"}], "total_crew_hrs": 239.5, "gap_hrs": 26.5}, "DH33HLGP": {"truck_hrs": 98.7, "truck_km": 1637.0, "active_days": 17, "aligned_from": "26/03/2026", "aligned_to": "21/04/2026", "driver": null, "assistants": [], "total_crew_hrs": 0.0, "gap_hrs": -98.7}, "CR61GCGP": {"truck_hrs": 55.5, "truck_km": 753.0, "active_days": 12, "aligned_from": "26/03/2026", "aligned_to": "21/04/2026", "driver": null, "assistants": [], "total_crew_hrs": 0.0, "gap_hrs": -55.5}}};
 
 const OLY_THEMES=['theme-light','theme-dark','theme-brand','theme-navy'];
 function olyTheme(t,btn){
@@ -516,7 +484,7 @@ document.getElementById('tbl-rank').innerHTML =
     const crew = D.crew[s.vehicle] || {};
     const dname = crew.driver ? crew.driver.name.split(' ').slice(-1)[0] : 'Unallocated';
     return '<tr>'+
-      '<td><span class="'+rc+'">'+(i+1)+'</span></td>'+
+      '<td><span class="'+rc+'">\'+(i+1)+'</span></td>'+
       '<td><strong>'+s.vehicle+'</strong></td>'+
       '<td style="font-size:12px;color:var(--color-text-secondary)">'+dname+'</td>'+
       '<td class="r">'+s.total_km.toLocaleString('en-ZA')+'</td>'+
@@ -571,11 +539,11 @@ document.getElementById('tbl-rank').innerHTML =
     const gapSign = c.gap_hrs>0 ? '+' : '';
     return '<tr>'+
       '<td><strong>'+t+'</strong></td>'+
-      '<td style="font-size:12px;color:var(--color-text-secondary)">'+(c.driver?c.driver.name.split(' ').slice(-1)[0]:'Unallocated')+'</td>'+
+      '<td style="font-size:12px;color:var(--color-text-secondary)">\'+(c.driver?c.driver.name.split(' ').slice(-1)[0]:'Unallocated')+'</td>'+
       '<td class="r">'+c.truck_hrs+'</td>'+
-      '<td class="r">'+(c.driver&&c.driver.matched?c.driver.hrs:'&mdash;')+'</td>'+
-      '<td class="r">'+(c.assistants&&c.assistants.length>=1&&c.assistants[0].matched?c.assistants[0].hrs:'&mdash;')+'</td>'+
-      '<td class="r">'+(c.assistants&&c.assistants.length>=2&&c.assistants[1].matched?c.assistants[1].hrs:'&mdash;')+'</td>'+
+      '<td class="r">\'+(c.driver&&c.driver.matched?c.driver.hrs:'&mdash;')+'</td>'+
+      '<td class="r">\'+(c.assistants&&c.assistants.length>=1&&c.assistants[0].matched?c.assistants[0].hrs:'&mdash;')+'</td>'+
+      '<td class="r">\'+(c.assistants&&c.assistants.length>=2&&c.assistants[1].matched?c.assistants[1].hrs:'&mdash;')+'</td>'+
       '<td class="r">'+c.total_crew_hrs+'</td>'+
       '<td class="r"><span class="badge '+gapCls+'">'+gapSign+c.gap_hrs+' hrs</span></td>'+
     '</tr>';
@@ -588,6 +556,65 @@ document.getElementById('tbl-rank').innerHTML =
       '<th class="r">Asst 1 Hrs</th><th class="r">Asst 2 Hrs</th>'+
       '<th class="r">Total Crew Hrs</th><th class="r">Depot Gap</th>'+
     '</tr></thead><tbody>'+rows.join('')+'</tbody>';
+})();
+
+(function(){
+  const f = D.fleet;
+  const people = f.people || [];
+  const maxHrs = Math.max(f.total_hrs || 0, f.total_crew_hrs || 0,
+    ...people.map(p => p.hrs || 0), 1);
+  const gpsW  = Math.round(((f.total_hrs || 0) / maxHrs) * 100);
+  const crewW = Math.round(((f.total_crew_hrs || 0) / maxHrs) * 100);
+
+  let crewRows = '';
+  people.forEach(p => {
+    const gap = (p.hrs || 0) - (f.total_hrs || 0);
+    const gapTxt = p.matched ? (gap >= 0 ? '+' : '') + gap.toFixed(1) + ' hrs depot' : '';
+    const gapCls = gap >= 0 ? 'gap-pos' : 'gap-neg';
+    const roleClass = (p.role || '').toLowerCase().startsWith('driver') ? 'driver' : 'asst';
+    crewRows += '<div class="crew-row">' +
+      '<span class="crew-role ' + roleClass + '">' + p.role + '</span>' +
+      '<span class="crew-name">' + p.name + '</span>' +
+      (p.matched
+        ? '<span class="crew-days">' + p.days + ' days</span>' +
+          '<span class="crew-hrs">' + p.hrs + ' hrs</span>' +
+          '<span class="crew-gap ' + gapCls + '">' + gapTxt + '</span>'
+        : '<span class="no-match">No clocking data</span>'
+      ) +
+    '</div>';
+  });
+  if (!people.length) crewRows = '<div class="no-crew-note">No crew data available.</div>';
+
+  const depotBadge = f.gap_hrs > 0
+    ? '<span class="badge br">+' + f.gap_hrs + ' hrs depot gap</span>'
+    : '';
+
+  const html =
+    '<div class="truck-card" style="border-left-color:var(--color-brand-primary);margin-bottom:4px;">' +
+      '<div class="truck-header">' +
+        '<div>' +
+          '<div class="truck-plate" style="font-size:13px;letter-spacing:.12em;color:var(--color-text-tertiary);text-transform:uppercase;">Fleet Total &mdash; All ' + f.n_vehicles + ' Vehicles</div>' +
+          '<div class="truck-meta">' +
+            '<span>' + (f.total_km || 0).toLocaleString() + ' km</span>' +
+            '<span>' + (f.total_hrs || 0) + ' GPS hrs</span>' +
+            '<span>' + (f.total_trip_days || 0) + ' trip days</span>' +
+            (f.total_crew_hrs > 0 ? '<span>' + f.total_crew_hrs + ' crew hrs</span>' : '') +
+            depotBadge +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="truck-hrs-bar">' +
+        '<div class="bar-label">Total GPS hours <strong>' + (f.total_hrs || 0) + '</strong></div>' +
+        '<div class="bar-track"><div class="bar-fill-gps" style="width:' + gpsW + '%"></div></div>' +
+        (f.total_crew_hrs > 0
+          ? '<div class="bar-label">Total crew hrs on trip days <strong>' + f.total_crew_hrs + '</strong></div>' +
+            '<div class="bar-track"><div class="bar-fill-crew" style="width:' + crewW + '%"></div></div>'
+          : '') +
+      '</div>' +
+      crewRows +
+    '</div>';
+
+  document.getElementById('fleet-summary').innerHTML = html;
 })();
 
 (function(){
@@ -661,7 +688,7 @@ document.getElementById('tbl-hm').innerHTML=
   '<tbody>'+D.vehicles.map(veh=>{
     const kms=D.activity.matrix[veh]||[];
     return'<tr><td class="vl">'+veh+'</td>'+kms.map(km=>{
-      const cls=hmClass(km);return'<td class="'+cls+'">'+(km>0?Math.round(km):'')+'</td>';
+      const cls=hmClass(km);return'<td class="'+cls+'">\'+(km>0?Math.round(km):'')+'</td>';
     }).join('')+'</tr>';
   }).join('')+'</tbody>';
 
@@ -700,7 +727,7 @@ function routeTable(id,rows){
     '<thead><tr><th>#</th><th>Location</th><th class="r">Days</th><th class="r">%</th></tr></thead>'+
     '<tbody>'+rows.map((r,i)=>{
       const op=r.name.toLowerCase().includes('olympic')||r.name.toLowerCase().includes('anchorville');
-      return'<tr class="'+(op?'op-row':'')+'">'+'<td>'+(i+1)+'</td><td>'+r.name+'</td>'+
+      return'<tr class="'+(op?'op-row':'')+'">'+ '<td>'+(i+1)+'</td><td>'+r.name+'</td>'+
         '<td class="r">'+r.count+'</td><td class="r">'+r.pct+'%</td></tr>';
     }).join('')+'</tbody>';
 }
